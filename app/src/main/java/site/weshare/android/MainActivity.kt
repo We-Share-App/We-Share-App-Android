@@ -50,4 +50,6 @@ fun GreetingPreview() {
     KachiAndroidTheme {
         Greeting("Android")
     }
+
+    //test
 }
