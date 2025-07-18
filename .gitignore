@@ -1,0 +1,46 @@
+# ========== 기본 설정 ==========
+*.iml
+.gradle/
+build/
+.cxx/
+local.properties
+.idea/
+.DS_Store
+
+# ========== Android 빌드 출력 ==========
+*.apk
+*.ap_
+*.dex
+*.class
+*.jar
+*.so
+*.log
+*.map
+*.hprof
+
+# ========== Keystore 및 민감 파일 ==========
+*.jks
+*.keystore
+key.properties
+signing.properties
+# Firebase 서비스 계정 키
+app/google-services.json
+*.pem
+
+# ========== OS/에디터 별 설정 ==========
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# VS Code
+.vscode/
+
+# ========== Android Studio 캐시 ==========
+captures/
+.externalNativeBuild/
+
+# ========== 테스트/빌드 중 생성 파일 ==========
+output.json
+test-results/
