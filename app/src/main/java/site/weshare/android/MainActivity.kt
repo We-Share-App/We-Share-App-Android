@@ -16,7 +16,11 @@ import site.weshare.android.ui.theme.KachiAndroidTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 시스템 UI(상단바, 하단바)와 겹치지 않도록 Edge-to-Edge 설정
         enableEdgeToEdge()
+
+        // 앱의 루트 Compose UI 설정
         setContent {
             KachiAndroidTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -32,6 +36,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
+    // 간단한 텍스트 컴포넌트 (UI 확인용)
     Text(
         text = "Hello $name!",
         modifier = modifier
@@ -41,6 +46,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
+    // 테마가 적용된 프리뷰
     KachiAndroidTheme {
         Greeting("Android")
     }
