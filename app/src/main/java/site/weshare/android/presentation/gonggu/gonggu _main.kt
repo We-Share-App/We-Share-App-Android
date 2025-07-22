@@ -107,6 +107,7 @@ fun GongguMainScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .padding(start = 7.dp) // 전체를 오른쪽으로 8dp 이동
     ) {
         // 상단 헤더
         TopAppBar(
