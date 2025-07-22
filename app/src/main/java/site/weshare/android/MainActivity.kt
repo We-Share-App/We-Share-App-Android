@@ -61,21 +61,20 @@ class MainActivity : ComponentActivity() {
 //    }
 
 
-//@Composable
-//fun Greeting(name: String, modifier: Modifier = Modifier) {
-//    // 간단한 텍스트 컴포넌트 (UI 확인용)
-//    Text(
-//        text = "Hello $name!",
-//        modifier = modifier
-//    )
-//}
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    // 간단한 텍스트 컴포넌트 (UI 확인용)
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
+    )
+}
 //
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    // 테마가 적용된 프리뷰
-//    KachiAndroidTheme {
-//        Greeting("Android")
-//    }
-//
-//}
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    // 테마가 적용된 프리뷰
+    KachiAndroidTheme {
+        Greeting("Android")
+    }
+}
