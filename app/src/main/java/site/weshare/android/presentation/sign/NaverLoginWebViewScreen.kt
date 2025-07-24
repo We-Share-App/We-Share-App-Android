@@ -37,11 +37,36 @@ fun NaverLoginWebViewScreen(
             }
 
             webViewClient = object : WebViewClient() {
+//                쿠키 확인전
+//                override fun onPageFinished(view: WebView?, url: String?) {
+//                    if (url != null && url.startsWith("http://10.0.2.2:8080/login/oauth2/code/naver")) {
+//                        onLoginSuccess()
+//                    }
+//                }
+
+                //쿠키 확인용 코드
                 override fun onPageFinished(view: WebView?, url: String?) {
                     if (url != null && url.startsWith("http://10.0.2.2:8080/login/oauth2/code/naver")) {
+                        // 🔍 쿠키 확인
+                        val cookieManager = CookieManager.getInstance()
+                        val rawCookies = cookieManager.getCookie(url).orEmpty()
+                        android.util.Log.d("LoginCookies", "🍪 쿠키: $rawCookies")
+
+                        val tokenMap = rawCookies.split(";").mapNotNull {
+                            val parts = it.trim().split("=", limit = 2)
+                            if (parts.size == 2) parts[0] to parts[1] else null
+                        }.toMap()
+
+                        val access = tokenMap["access"]
+                        val refresh = tokenMap["refresh"]
+
+                        android.util.Log.d("LoginTokens", "access=$access, refresh=$refresh")
+
+                        // ✅ 다음 화면으로 이동
                         onLoginSuccess()
                     }
                 }
+
 
                 @Suppress("DEPRECATION")
                 override fun onReceivedError(
