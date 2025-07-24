@@ -37,7 +37,8 @@ object MockData {
             totalQuantity = 10, // 이미지: 총 구매 개수: 10개
             quantitySold = 9,   // 계산: 10 (총) - 1 (남은) = 9 (판매)
             remainingDays = 10  // 공동구매 남은 시간(일).
-        )
+        ),
+
     )
 
     val exchangeProducts = listOf(
@@ -68,6 +69,7 @@ object MockData {
             name = "태그호이어 시계",
             category = "의류, 디지털",
             exchangeCondition = "희망 카테고리"
-        )
+        ),
+
     )
 }

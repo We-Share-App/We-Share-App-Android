@@ -2,11 +2,13 @@
 
 package site.weshare.android.presentation.home
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -39,12 +42,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
-import com.google.accompanist.pager.HorizontalPagerIndicator
+//import com.google.accompanist.pager.HorizontalPagerIndicator
 import kotlinx.coroutines.delay
 import site.weshare.android.R
 import site.weshare.android.data.MockData
 import site.weshare.android.model.ExchangeProduct
 import site.weshare.android.model.GroupPurchaseProduct
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.Dp
+
+//import androidx.compose.ui.unit.toPx // toPx()를 사용하기 위해 필요
+
 
 @Composable
 fun HomeScreen() {
@@ -54,8 +68,7 @@ fun HomeScreen() {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()), // 전체 화면 스크롤 가능하도록
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 검색창과 아이콘
@@ -107,18 +120,6 @@ fun HomeScreen() {
                 contentScale = ContentScale.FillWidth
             )
         }
-        // 광고 배너 하단 PagerIndicator
-        Spacer(modifier = Modifier.height(8.dp))
-        HorizontalPagerIndicator(
-            pagerState = adPagerState,
-            pageCount = adImages.size,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            activeColor = Color.Black, // 활성 페이지 색상
-            inactiveColor = Color.LightGray, // 비활성 페이지 색상
-            indicatorWidth = 8.dp, // 인디케이터 개별 너비
-            indicatorHeight = 8.dp, // 인디케이터 개별 높이
-            spacing = 4.dp // 인디케이터 간 간격
-        )
 
 
         // 공동구매 섹션
@@ -149,6 +150,7 @@ fun HomeScreen() {
     }
 }
 
+
 @Composable
 fun SectionHeader(title: String, onMoreClick: () -> Unit) {
     Row(
@@ -165,7 +167,7 @@ fun SectionHeader(title: String, onMoreClick: () -> Unit) {
             painter = painterResource(id = R.drawable.ic_arrow_forward),
             contentDescription = "더보기",
             modifier = Modifier
-                .size(width = 50.dp, height = 20.dp)
+                .size(width = 45.dp, height = 20.dp)
                 .clickable { onMoreClick() }
         )
     }
@@ -174,53 +176,112 @@ fun SectionHeader(title: String, onMoreClick: () -> Unit) {
 
 
 @Composable
-fun <T> HorizontalProductList(products: List<T>, itemContent: @Composable (T) -> Unit) {
-    val pagerState = rememberPagerState(pageCount = { products.size })
+fun <T> HorizontalProductList(
+    products: List<T>,
+    itemWidth: Dp = 110.dp,                      // 기본값
+    itemContent: @Composable (T) -> Unit
+) {
+    // 1) LazyRow 상태 객체
+    val listState = rememberLazyListState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        HorizontalPager(
-            state = pagerState,
+
+        // 2) 가로 스크롤 상품 리스트
+        LazyRow(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            pageSpacing = 16.dp
-        ) { page ->
-            Box(modifier = Modifier.width(110.dp)) { // 각 아이템의 너비를 지정
-                itemContent(products[page])
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(products) { item ->
+                Box(Modifier.width(itemWidth)) {
+                    itemContent(item)
+                }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
 
-        // 커스텀 슬라이드 바 Pager Indicator 구현
-        if (products.size > 1) { // 페이지가 1개 이상일 때만 인디케이터 표시
-            val totalIndicatorWidth = 60.dp
-            val indicatorHeight = 4.dp
-            val activeIndicatorWidth = totalIndicatorWidth / products.size.toFloat() // 활성 바의 너비 (Float으로 계산)
+        Spacer(Modifier.height(12.dp))
 
-            Box(
-                modifier = Modifier
-                    .width(totalIndicatorWidth) // 전체 트랙 너비 고정
-                    .height(indicatorHeight) // 트랙 높이 고정
-                    .clip(RoundedCornerShape(2.dp)) // 바의 둥근 모서리
-                    .background(Color.LightGray) // 비활성 트랙 색상
-                    .align(Alignment.CenterHorizontally) // 중앙 정렬
-            ) {
-                val animatedOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                val translateX = animatedOffset * activeIndicatorWidth
-
-                Box(
-                    modifier = Modifier
-                        .width(activeIndicatorWidth) // 활성 바의 계산된 너비
-                        .height(indicatorHeight) // 활성 바의 높이 고정
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(Color.Black) // 활성 바 색상
-                        .align(Alignment.CenterStart) // 시작점에 정렬
-                        .offset(x = translateX) // 계산된 X 오프셋 적용
-                )
-            }
-        }
+        // 3) 커스텀 인디케이터
+        LazyRowSlideBarIndicator(
+            listState = listState,
+            itemWidth = itemWidth,
+            itemSpacing = 10.dp,
+            itemCount = products.size,
+            modifier = Modifier
+                .padding(horizontal = 160.dp)          // 좌우 여백 조정
+                .align(Alignment.CenterHorizontally)  // 가운데 정렬
+        )
     }
 }
+
+/**
+ * LazyRow용 슬라이드‑바 인디케이터
+ */
+@Composable
+fun LazyRowSlideBarIndicator(
+    listState: LazyListState,
+    itemWidth: Dp,
+    itemSpacing: Dp,
+    itemCount: Int,
+    modifier: Modifier = Modifier,
+    height: Dp = 6.dp,
+    trackColor: Color = Color(0xFFE0E0E0),
+    barColor: Color = Color.DarkGray,
+) {
+    val density = LocalDensity.current
+    // 진행률(0f‒1f) 계산 ---------------------------------------------------
+    val progress by remember (
+        listState, density, itemWidth, itemSpacing, itemCount   // ② key에 포함
+    ){
+        derivedStateOf {
+            val viewportWidthPx =
+                listState.layoutInfo.viewportEndOffset - listState.layoutInfo.viewportStartOffset
+
+            val itemWidthPx  = with(density) { itemWidth.roundToPx() }
+            val spacingPx    = with(density) { itemSpacing.roundToPx() }
+
+            val totalContentWidth =
+                (itemWidthPx + spacingPx) * itemCount - spacingPx
+
+            val firstIndex  = listState.firstVisibleItemIndex
+            val firstOffset = listState.firstVisibleItemScrollOffset
+            val scrolledPx  = (itemWidthPx + spacingPx) * firstIndex + firstOffset
+
+            if (totalContentWidth <= viewportWidthPx) 0f
+            else (scrolledPx / (totalContentWidth - viewportWidthPx).toFloat())
+                .coerceIn(0f, 1f)
+        }
+    }
+    val animatedProgress by animateFloatAsState(progress, label = "slideBarAnim")
+
+    // UI -----------------------------------------------------------------
+    BoxWithConstraints(
+        modifier
+            .fillMaxWidth()
+            .height(height)
+    ) {
+        val fullWidth = constraints.maxWidth.toFloat()
+
+        // 뒤쪽 트랙
+        Box(
+            Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(50))
+                .background(trackColor)
+        )
+        // 앞쪽 바
+        Box(
+            Modifier
+                .height(height)
+                .width(with(LocalDensity.current) { (fullWidth * animatedProgress).toDp() })
+                .clip(RoundedCornerShape(50))
+                .background(barColor)
+        )
+    }
+}
+
 
 @Composable
 fun GroupPurchaseProductItem(product: GroupPurchaseProduct) {
@@ -234,7 +295,7 @@ fun GroupPurchaseProductItem(product: GroupPurchaseProduct) {
             painter = painterResource(id = imageResId),
             contentDescription = product.name,
             modifier = Modifier
-                .size(90.dp)
+                .size(95.dp)
                 .clip(RoundedCornerShape(8.dp)),
             contentScale = ContentScale.Crop
         )
@@ -259,7 +320,7 @@ fun ExchangeProductItem(product: ExchangeProduct) {
             painter = painterResource(id = imageResId),
             contentDescription = product.name,
             modifier = Modifier
-                .size(90.dp)
+                .size(95.dp)
                 .clip(RoundedCornerShape(8.dp)),
             contentScale = ContentScale.Crop
         )
