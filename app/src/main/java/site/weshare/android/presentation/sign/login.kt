@@ -1,7 +1,5 @@
 package site.weshare.android.presentation.sign.login
 
-import android.net.Uri
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,9 +14,13 @@ import site.weshare.android.R
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreen() {
-    val context = LocalContext.current
+fun LoginScreenPreview() {
+    LoginScreen()
+}
 
+@Composable
+fun LoginScreen(navToWebLogin: () -> Unit = {}) {
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -103,18 +105,17 @@ fun LoginScreen() {
                     .size(48.dp)
                     .clickable { /* TODO */ }
             )
+
             Image(
                 painter = painterResource(id = R.drawable.icon_naver),
                 contentDescription = "Naver 로그인",
                 modifier = Modifier
                     .size(48.dp)
                     .clickable {
-                        val loginUrl = "http://10.0.2.2:8080/oauth2/authorization/naver"
-
-                        val intent = CustomTabsIntent.Builder().build()
-                        intent.launchUrl(context, Uri.parse(loginUrl))
+                        navToWebLogin()
                     }
             )
+
             Image(
                 painter = painterResource(id = R.drawable.icon_kakao),
                 contentDescription = "Kakao 로그인",
@@ -122,6 +123,7 @@ fun LoginScreen() {
                     .size(48.dp)
                     .clickable { /* TODO */ }
             )
+
             Image(
                 painter = painterResource(id = R.drawable.icon_facebook),
                 contentDescription = "Facebook 로그인",
