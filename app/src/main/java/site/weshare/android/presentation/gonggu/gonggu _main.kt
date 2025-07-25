@@ -170,7 +170,7 @@ data class GongguUiState(
 
 enum class FilterType(val displayName: String, val apiValue: String?) {
     ALL("전체", null),
-    DISTANCE("거리", "distance"),
+    DISTANCE("가격", "distance"),
     PAYMENT("결제", "payment"),
     CATEGORY("카테고리", "category")
 }
@@ -353,7 +353,19 @@ fun GongguMainScreen(
                     FilterChip(
                         selected = uiState.selectedFilter == filter,
                         onClick = { viewModel.updateFilter(filter) },
-                        label = { Text(filter.displayName, fontSize = 12.sp) }
+                        label = {
+                            Text(
+                                filter.displayName,
+                                fontSize = 14.sp,           // 텍스트 크기 변경
+                                fontWeight = FontWeight.Bold // 텍스트 굵기 변경
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color.Blue,    // 선택된 배경색
+                            selectedLabelColor = Color.White,       // 선택된 텍스트색
+                            containerColor = Color.White,       // 기본 배경색
+                            labelColor = Color.Black                // 기본 텍스트색
+                        )
                     )
                 }
             }
