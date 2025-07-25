@@ -16,46 +16,57 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.CompositionLocalProvider
 
-// ==================== 수정된 메인화면 (모델들 제거하고 간소화) ====================
+// ==================== 백엔드 연결을 위한 데이터 모델 ====================
 data class GongguItemResponse(
     val id: Int,
     val title: String,
     val description: String,
+    val price: Int,
     val currentCount: Int,
     val maxCount: Int,
     val daysLeft: Int,
     val likes: Int,
     val comments: Int,
+    val views: Int,
     val imageUrl: String? = null,
     val tag: String? = null,
-    val createdAt: String? = null,
-    val location: String? = null
+    val createdAt: String,
+    val location: String,
+    val sellerId: Int
 )
 
 data class GongguItem(
     val id: Int,
     val title: String,
     val description: String,
+    val price: String,
     val currentCount: Int,
     val maxCount: Int,
     val daysLeft: Int,
     val likes: Int,
     val comments: Int,
+    val views: Int,
     val imageRes: Int? = null,
     val imageUrl: String? = null,
     val tag: String? = null
@@ -63,19 +74,22 @@ data class GongguItem(
 
 fun GongguItemResponse.toUiModel(): GongguItem {
     return GongguItem(
-        id = this.id,
-        title = this.title,
-        description = this.description,
-        currentCount = this.currentCount,
-        maxCount = this.maxCount,
-        daysLeft = this.daysLeft,
-        likes = this.likes,
-        comments = this.comments,
-        imageUrl = this.imageUrl,
-        tag = this.tag
+        id = id,
+        title = title,
+        description = description,
+        price = String.format("%,d원", price),
+        currentCount = currentCount,
+        maxCount = maxCount,
+        daysLeft = daysLeft,
+        likes = likes,
+        comments = comments,
+        views = views,
+        imageUrl = imageUrl,
+        tag = tag
     )
 }
 
+// ==================== API Service & Repository ====================
 interface GongguApiService {
     suspend fun getGongguItems(
         location: String,
@@ -97,113 +111,52 @@ class GongguRepository(
         sortBy: String = "latest",
         category: String? = null,
         paymentType: String? = null
-    ): Result<List<GongguItem>> {
-        return try {
-            if (apiService != null) {
-                val response = apiService.getGongguItems(location, sortBy, category, paymentType)
-                Result.success(response.map { it.toUiModel() })
-            } else {
-                Result.success(getMockData())
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    ): Result<List<GongguItem>> = try {
+        if (apiService != null) {
+            val resp = apiService.getGongguItems(location, sortBy, category, paymentType)
+            Result.success(resp.map { it.toUiModel() })
+        } else {
+            Result.success(getMockData())
         }
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
-    suspend fun searchItems(query: String): Result<List<GongguItem>> {
-        return try {
-            if (apiService != null) {
-                val response = apiService.searchGongguItems(query)
-                Result.success(response.map { it.toUiModel() })
-            } else {
-                val filteredData = getMockData().filter {
-                    it.title.contains(query, ignoreCase = true)
-                }
-                Result.success(filteredData)
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun searchItems(query: String): Result<List<GongguItem>> = try {
+        if (apiService != null) {
+            Result.success(apiService.searchGongguItems(query).map { it.toUiModel() })
+        } else {
+            Result.success(getMockData().filter { it.title.contains(query, true) })
         }
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
-    suspend fun toggleLike(itemId: Int, isLiked: Boolean): Result<Boolean> {
-        return try {
-            if (apiService != null) {
-                val result = if (isLiked) {
-                    apiService.unlikeGongguItem(itemId)
-                } else {
-                    apiService.likeGongguItem(itemId)
-                }
-                Result.success(result)
-            } else {
-                Result.success(true)
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun toggleLike(itemId: Int, isLiked: Boolean): Result<Boolean> = try {
+        if (apiService != null) {
+            val result = if (isLiked) apiService.unlikeGongguItem(itemId)
+            else apiService.likeGongguItem(itemId)
+            Result.success(result)
+        } else {
+            Result.success(true)
         }
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
-    private fun getMockData(): List<GongguItem> {
-        return listOf(
-            GongguItem(
-                id = 1,
-                title = "제주삼다수 2L",
-                description = "총 구매 개수 : 24개\n남은 개수 : 8개",
-                currentCount = 16,
-                maxCount = 24,
-                daysLeft = 10,
-                likes = 5,
-                comments = 13,
-                imageRes = R.drawable.gonggu_samdasu
-            ),
-            GongguItem(
-                id = 2,
-                title = "코카콜라 제로 190ml 60개 공동구매해요~",
-                description = "총 구매 개수 : 60개\n남은 개수 : 15개",
-                currentCount = 45,
-                maxCount = 60,
-                daysLeft = 8,
-                likes = 3,
-                comments = 6,
-                imageRes = R.drawable.gonggu_cola
-            ),
-            GongguItem(
-                id = 3,
-                title = "리벤스 물티슈 대용량",
-                description = "총 구매 개수 : 80개\n남은 개수 : 17개",
-                currentCount = 63,
-                maxCount = 80,
-                daysLeft = 4,
-                likes = 6,
-                comments = 10,
-                imageRes = R.drawable.gonggu_tissue
-            ),
-            GongguItem(
-                id = 4,
-                title = "신라면 공구해요",
-                description = "총 구매 개수 : 40개\n남은 개수 : 5개",
-                currentCount = 35,
-                maxCount = 40,
-                daysLeft = 4,
-                likes = 9,
-                comments = 23,
-                imageRes = R.drawable.gonggu_ramen
-            ),
-            GongguItem(
-                id = 5,
-                title = "자취생 필수품 햇반",
-                description = "총 구매 개수 : 48개\n남은 개수 : 10개",
-                currentCount = 38,
-                maxCount = 48,
-                daysLeft = 2,
-                likes = 7,
-                comments = 15,
-                imageRes = R.drawable.gonggu_bab
-            )
-        )
-    }
+    private fun getMockData(): List<GongguItem> = listOf(
+        GongguItem(1, "제주삼다수 2L", "총 구매 개수 : 24개\n남은 개수 : 8개", "25,920원",16,24,10,5,13,43, R.drawable.gonggu_samdasu),
+        GongguItem(2, "코카콜라 제로 190ml 60개 공동구매해요~","총 구매 개수 : 60개\n남은 개수 : 15개","48,000원",45,60,8,3,6,32, R.drawable.gonggu_cola),
+        GongguItem(3, "리벤스 물티슈 대용량","총 구매 개수 : 80개\n남은 개수 : 17개","35,600원",63,80,4,6,10,56, R.drawable.gonggu_tissue),
+        GongguItem(4, "신라면 공구해요","총 구매 개수 : 40개\n남은 개수 : 5개","28,800원",35,40,4,9,23,67, R.drawable.gonggu_ramen),
+        GongguItem(5, "자취생 필수품 햇반","총 구매 개수 : 48개\n남은 개수 : 10개","32,400원",38,48,2,7,15,89, R.drawable.gonggu_bab),
+        GongguItem(6, "오뚜기 진라면 매운맛","총 구매 개수 : 36개\n남은 개수 : 12개","19,800원",24,36,6,4,8,28, R.drawable.gonggu_jinramen),
+        GongguItem(7, "봉쥬르끌레어 캡슐세제","총 구매 개수 : 200개\n남은 개수 : 7개","42,000원",13,20,12,2,4,19, R.drawable.gonggu_seje),
+        GongguItem(8, "동원 참치캔","총 구매 개수 : 50개\n남은 개수 : 18개","38,500원",32,50,1,11,26,78, R.drawable.gonggu_dongwon)
+    )
 }
 
+// ==================== UI State & ViewModel ====================
 data class GongguUiState(
     val items: List<GongguItem> = emptyList(),
     val isLoading: Boolean = false,
@@ -211,7 +164,8 @@ data class GongguUiState(
     val currentLocation: String = "흑석동",
     val selectedFilter: FilterType = FilterType.ALL,
     val sortBy: SortType = SortType.LATEST,
-    val totalCount: Int = 0
+    val totalCount: Int = 0,
+    val showLocationDialog: Boolean = false
 )
 
 enum class FilterType(val displayName: String, val apiValue: String?) {
@@ -231,7 +185,6 @@ enum class SortType(val displayName: String, val apiValue: String) {
 class GongguViewModel(
     private val repository: GongguRepository = GongguRepository()
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(GongguUiState())
     val uiState: StateFlow<GongguUiState> = _uiState.asStateFlow()
 
@@ -242,15 +195,12 @@ class GongguViewModel(
     fun loadGongguItems() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-
-            val result = repository.getGongguItems(
+            repository.getGongguItems(
                 location = _uiState.value.currentLocation,
                 sortBy = _uiState.value.sortBy.apiValue,
                 category = if (_uiState.value.selectedFilter == FilterType.CATEGORY) "food" else null,
                 paymentType = if (_uiState.value.selectedFilter == FilterType.PAYMENT) "card" else null
-            )
-
-            result.fold(
+            ).fold(
                 onSuccess = { items ->
                     _uiState.value = _uiState.value.copy(
                         items = items,
@@ -258,9 +208,9 @@ class GongguViewModel(
                         isLoading = false
                     )
                 },
-                onFailure = { exception ->
+                onFailure = { e ->
                     _uiState.value = _uiState.value.copy(
-                        error = exception.message ?: "Unknown error",
+                        error = e.message ?: "Unknown error",
                         isLoading = false
                     )
                 }
@@ -273,12 +223,9 @@ class GongguViewModel(
             loadGongguItems()
             return
         }
-
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-
-            val result = repository.searchItems(query)
-            result.fold(
+            repository.searchItems(query).fold(
                 onSuccess = { items ->
                     _uiState.value = _uiState.value.copy(
                         items = items,
@@ -286,9 +233,9 @@ class GongguViewModel(
                         isLoading = false
                     )
                 },
-                onFailure = { exception ->
+                onFailure = { e ->
                     _uiState.value = _uiState.value.copy(
-                        error = exception.message ?: "Search failed",
+                        error = e.message ?: "Search failed",
                         isLoading = false
                     )
                 }
@@ -307,27 +254,29 @@ class GongguViewModel(
     }
 
     fun updateLocation(location: String) {
-        _uiState.value = _uiState.value.copy(currentLocation = location)
+        _uiState.value = _uiState.value.copy(currentLocation = location, showLocationDialog = false)
         loadGongguItems()
+    }
+
+    fun showLocationDialog() {
+        _uiState.value = _uiState.value.copy(showLocationDialog = true)
+    }
+
+    fun hideLocationDialog() {
+        _uiState.value = _uiState.value.copy(showLocationDialog = false)
     }
 
     fun toggleLike(itemId: Int) {
         viewModelScope.launch {
             val currentItems = _uiState.value.items
-            val itemIndex = currentItems.indexOfFirst { it.id == itemId }
-            if (itemIndex == -1) return@launch
-
-            val currentItem = currentItems[itemIndex]
-            val isCurrentlyLiked = false
-
-            repository.toggleLike(itemId, isCurrentlyLiked)
-
-            val updatedItems = currentItems.toMutableList().apply {
-                this[itemIndex] = currentItem.copy(
-                    likes = if (isCurrentlyLiked) currentItem.likes - 1 else currentItem.likes + 1
-                )
+            val idx = currentItems.indexOfFirst { it.id == itemId }
+            if (idx == -1) return@launch
+            val item = currentItems[idx]
+            repository.toggleLike(itemId, isLiked = false)
+            val updated = currentItems.toMutableList().apply {
+                this[idx] = item.copy(likes = item.likes + 1)
             }
-            _uiState.value = _uiState.value.copy(items = updatedItems)
+            _uiState.value = _uiState.value.copy(items = updated)
         }
     }
 
@@ -336,7 +285,8 @@ class GongguViewModel(
     }
 }
 
-// ==================== 메인화면 UI (기존과 동일) ====================
+// ==================== UI Components ====================
+// ==================== UI Components ====================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GongguMainScreen(
@@ -347,171 +297,199 @@ fun GongguMainScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            viewModel.clearError()
-        }
+        if (uiState.error != null) viewModel.clearError()
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(start = 7.dp)
     ) {
-        TopAppBar(
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { }
-                ) {
-                    Text(
-                        text = uiState.currentLocation,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = { }) {
-                    Icon(Icons.Default.Search, contentDescription = "검색")
-                }
-                IconButton(onClick = { }) {
-                    Icon(Icons.Default.FavoriteBorder, contentDescription = "찜")
-                }
-                IconButton(onClick = { }) {
-                    Icon(Icons.Default.Notifications, contentDescription = "알림")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.White
-            )
-        )
-
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .padding(start = 7.dp)
         ) {
-            FilterType.values().forEach { filter ->
-                FilterChip(
-                    onClick = { viewModel.updateFilter(filter) },
-                    label = { Text(filter.displayName, fontSize = 12.sp) },
-                    selected = uiState.selectedFilter == filter
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "상품 ${uiState.totalCount}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+            TopAppBar(
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable {
+                            if (uiState.showLocationDialog) {
+                                viewModel.hideLocationDialog()
+                            } else {
+                                viewModel.showLocationDialog()
+                            }
+                        }
+                    ) {
+                        Text(uiState.currentLocation, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                        // 화살표 애니메이션 추가
+                        Icon(
+                            Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .graphicsLayer {
+                                    rotationZ = if (uiState.showLocationDialog) 180f else 0f
+                                }
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {}) { Icon(Icons.Default.Search, contentDescription = "검색") }
+                    IconButton(onClick = {}) { Icon(Icons.Default.FavoriteBorder, contentDescription = "찜") }
+                    IconButton(onClick = {}) { Icon(Icons.Default.Notifications, contentDescription = "알림") }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
+
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { }
-            ) {
-                Text(
-                    text = uiState.sortBy.displayName,
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.Gray
-                )
-            }
-        }
-
-        if (uiState.isLoading) {
-            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(0.dp, 0.dp, 0.dp, 80.dp)
-            ) {
-                items(
-                    items = uiState.items,
-                    key = { it.id }
-                ) { item ->
-                    GongguItemCard(
-                        item = item,
-                        onClick = { onItemClick(item) },
-                        onLikeClick = { viewModel.toggleLike(item.id) }
+                FilterType.values().forEach { filter ->
+                    FilterChip(
+                        selected = uiState.selectedFilter == filter,
+                        onClick = { viewModel.updateFilter(filter) },
+                        label = { Text(filter.displayName, fontSize = 12.sp) }
                     )
-                    if (item != uiState.items.last()) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 0.dp),
-                            thickness = 0.5.dp,
-                            color = Color.LightGray
-                        )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("상품 ${uiState.totalCount}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { }) {
+                    Text(uiState.sortBy.displayName, fontSize = 12.sp, color = Color.Gray)
+                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
+                }
+            }
+
+            if (uiState.isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(bottom = 100.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
+                ) {
+                    items(uiState.items, key = { it.id }) { item ->
+                        GongguItemCard(item, onClick = { onItemClick(item) }, onLikeClick = { viewModel.toggleLike(item.id) })
+                        if (item != uiState.items.last()) {
+                            Divider(color = Color.LightGray, thickness = 0.5.dp)
+                        }
                     }
                 }
             }
         }
 
+        FloatingActionButton(
+            onClick = onRegisterClick,
+            containerColor = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .size(width = 100.dp, height = 56.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("등록하기", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White)
+            }
+        }
+
+        // Location Selection Dialog
+        if (uiState.showLocationDialog) {
+            LocationSelectionDialog(
+                currentLocation = uiState.currentLocation,
+                onLocationSelected = { location -> viewModel.updateLocation(location) },
+                onDismiss = { viewModel.hideLocationDialog() }
+            )
+        }
+    }
+}
+
+@Composable
+fun LocationSelectionDialog(
+    currentLocation: String,
+    onLocationSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val locations = listOf("흑석동", "이태원2동", "재설정하기")
+
+    // 투명도 조절: 이 값을 변경해서 배경 투명도 조절 (0.0f~1.0f)
+    val backgroundAlpha = 0.3f // 0.1f=매우연함, 0.3f=적당함, 0.5f=진함
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // 배경 (투명도 조절 가능)
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            contentAlignment = Alignment.BottomEnd
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = backgroundAlpha))
+                .clickable { onDismiss() }
+        )
+
+        // 흑석동 바로 밑에 위치하도록 조정
+        Card(
+            modifier = Modifier
+                .width(200.dp)
+                .wrapContentHeight()
+                .padding(start = 20.dp, top = 80.dp), // 흑석동 바로 아래 위치
+            shape = RoundedCornerShape(8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            FloatingActionButton(
-                onClick = onRegisterClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(56.dp)
+            Column(
+                modifier = Modifier.padding(0.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "등록하기",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                locations.forEach { location ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onLocationSelected(location) }
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = location,
+                            fontSize = 16.sp,
+                            color = if (location == currentLocation) Color.Black else Color.Gray,
+                            fontWeight = if (location == currentLocation) FontWeight.ExtraBold else FontWeight.Normal
+                        )
+                    }
+                    if (location != locations.last()) {
+                        Divider(
+                            color = Color.LightGray.copy(alpha = 0.5f),
+                            thickness = 0.5.dp
+                        )
+                    }
                 }
             }
         }
     }
 }
-
 @Composable
 fun GongguItemCard(
     item: GongguItem,
     onClick: () -> Unit,
     onLikeClick: () -> Unit = {}
 ) {
+    val isPreview = LocalInspectionMode.current
+    var menuExpanded by remember { mutableStateOf(isPreview) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -537,8 +515,9 @@ fun GongguItemCard(
                         contentScale = ContentScale.Crop
                     )
                 }
+
                 item.imageUrl != null -> {
-                    // TODO: AsyncImage
+                    /* TODO: AsyncImage 로 네트워크 이미지 로드 */
                 }
             }
         }
@@ -561,9 +540,7 @@ fun GongguItemCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-
                 Spacer(modifier = Modifier.height(0.5.dp))
-
                 Text(
                     text = item.description,
                     fontSize = 13.sp,
@@ -576,69 +553,155 @@ fun GongguItemCard(
             }
 
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "마감 D-${item.daysLeft}",
+                    "마감 D-${item.daysLeft}",
                     fontSize = 12.sp,
-                    color = if (item.daysLeft <= 3) Color.Red else Color.Gray,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (item.daysLeft <= 3) Color.Red else Color.Gray
                 )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Person,
+                        Icons.Default.Person,
                         contentDescription = null,
                         modifier = Modifier.size(12.dp),
                         tint = Color.Gray
                     )
-                    Text(
-                        text = " ${item.likes}",
-                        fontSize = 11.sp,
-                        color = Color.Gray
-                    )
-
+                    Text(" ${item.likes}", fontSize = 11.sp, color = Color.Gray)
                     Spacer(modifier = Modifier.width(8.dp))
-
                     Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
+                        Icons.Default.FavoriteBorder,
                         contentDescription = null,
                         modifier = Modifier
                             .size(12.dp)
                             .clickable { onLikeClick() },
                         tint = Color.Gray
                     )
-                    Text(
-                        text = " ${item.comments}",
-                        fontSize = 11.sp,
-                        color = Color.Gray
-                    )
+                    Text(" ${item.comments}", fontSize = 11.sp, color = Color.Gray)
                 }
             }
         }
 
-        IconButton(
-            onClick = { },
-            modifier = Modifier.size(20.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "더보기",
-                modifier = Modifier.size(16.dp),
-                tint = Color.Gray
-            )
+        Box {
+            IconButton(onClick = { menuExpanded = true }) {
+                Icon(Icons.Default.MoreVert, contentDescription = null)
+            }
+
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+                shape = RoundedCornerShape(0.dp),
+                shadowElevation = 5.dp,
+                tonalElevation = 0.dp,
+                containerColor = Color.White,
+                modifier = Modifier.padding(0.dp)
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.report),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text("신고하기", fontSize = 14.sp)
+                        }
+                    },
+                    onClick = { menuExpanded = false },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                    modifier = Modifier.height(30.dp)
+                )
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.share),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text("공유하기", fontSize = 14.sp)
+                        }
+                    },
+                    onClick = { menuExpanded = false },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                    modifier = Modifier.height(30.dp)
+                )
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ask),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text("문의하기", fontSize = 14.sp)
+                        }
+                    },
+                    onClick = { menuExpanded = false },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                    modifier = Modifier.height(30.dp)
+                )
+            }
         }
     }
 }
 
+// ==================== Preview ====================
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GongguMainScreenPreview() {
     MaterialTheme {
         GongguMainScreen()
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun GongguItemCardMenuPreview() {
+    CompositionLocalProvider(LocalInspectionMode provides true) {
+        MaterialTheme {
+            GongguItemCard(
+                item = GongguItem(
+                    id = 1,
+                    title = "제주삼다수 2L",
+                    description = "총 구매 개수 : 24개\n남은 개수 : 8개",
+                    price = "25,920원",
+                    currentCount = 16,
+                    maxCount = 24,
+                    daysLeft = 10,
+                    likes = 5,
+                    comments = 13,
+                    views = 43,
+                    imageRes = R.drawable.gonggu_samdasu
+                ),
+                onClick = {},
+                onLikeClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LocationSelectionDialogPreview() {
+    MaterialTheme {
+        LocationSelectionDialog(
+            currentLocation = "흑석동",
+            onLocationSelected = {},
+            onDismiss = {}
+        )
     }
 }
