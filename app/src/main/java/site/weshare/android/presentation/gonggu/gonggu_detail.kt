@@ -571,7 +571,8 @@ fun GongguDetailScreen(
                     Icon(
                         Icons.Default.MoreVert,
                         contentDescription = "더보기",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Gray
                     )
                 }
             }
@@ -804,25 +805,23 @@ fun GongguDetailScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(horizontal = 20.dp, vertical = 15.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Quantity Selector
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .border(
-                            1.dp,
-                            Color.LightGray,
-                            RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                        .height(40.dp)
+                        .width(90.dp)
                 ) {
+                    // - 버튼 (패딩 없음)
                     IconButton(
                         onClick = {
                             if (selectedQuantity > 1) selectedQuantity--
                         },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(24.dp) // 크기 줄임
                     ) {
                         Text(
                             "-",
@@ -831,18 +830,42 @@ fun GongguDetailScreen(
                         )
                     }
 
-                    Text(
-                        text = "$selectedQuantity",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                    // 세로 구분선
+                    Divider(
+                        modifier = Modifier
+                            .height(40.dp)
+                            .width(1.dp),
+                        color = Color.LightGray
                     )
 
+                    // 숫자 영역 (넉넉한 패딩)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 12.dp), // 구분선과 숫자 사이 간격 넓게
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "$selectedQuantity",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // 세로 구분선
+                    Divider(
+                        modifier = Modifier
+                            .height(40.dp)
+                            .width(1.dp),
+                        color = Color.LightGray
+                    )
+
+                    // + 버튼 (패딩 없음)
                     IconButton(
                         onClick = {
                             if (selectedQuantity < item.remainingQuantity) selectedQuantity++
                         },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(24.dp) // 크기 줄임
                     ) {
                         Text(
                             "+",
@@ -852,7 +875,7 @@ fun GongguDetailScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(24.dp))
 
                 // Price and Button
                 Column(modifier = Modifier.weight(1f)) {
@@ -862,31 +885,31 @@ fun GongguDetailScreen(
 
                     Text(
                         text = "${String.format("%,d", totalPrice)}원",
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Blue
                     )
                     Text(
                         text = "무료배송",
                         fontSize = 11.sp,
-                        color = Color.Gray
+                        color = Color.Black
                     )
                 }
-
                 Button(
                     onClick = { onParticipateClick(selectedQuantity) },
                     enabled = selectedQuantity <= item.remainingQuantity && item.remainingQuantity > 0,
                     modifier = Modifier
-                        .height(48.dp)
-                        .width(80.dp),
+                        .height(37.dp)
+                        .width(100.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF4CAF50)
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(0.dp) // 내부 패딩 제거
                 ) {
                     Text(
                         "참여하기",
-                        fontSize = 12.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
