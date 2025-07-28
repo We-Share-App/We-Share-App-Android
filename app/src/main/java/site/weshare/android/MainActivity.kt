@@ -14,6 +14,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import site.weshare.android.presentation.gonggu.GongguMainScreen
+import site.weshare.android.presentation.home.HomeScreen
 import site.weshare.android.presentation.sign.EmailInputScreen
 import site.weshare.android.presentation.sign.VerificationCodeScreen
 import site.weshare.android.presentation.sign.login.LoginScreen
@@ -70,6 +72,12 @@ class MainActivity : ComponentActivity() {
                                 onNext = { /* 다음 화면으로 */ },
                                 onBack = { navController.popBackStack() }
                             )
+                        }
+                        composable("home") {
+                            HomeScreen(navController = navController)
+                        }
+                        composable("gonggu_main") {
+                            GongguMainScreen(navController = navController)
                         }
                     }
                 }
