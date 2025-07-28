@@ -4,16 +4,38 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import site.weshare.android.presentation.barter.BarterScreen
+import site.weshare.android.presentation.gonggu.GongguMainScreen
+import site.weshare.android.presentation.home.HomeScreen
 import site.weshare.android.presentation.sign.EmailInputScreen
 import site.weshare.android.presentation.sign.VerificationCodeScreen
 import site.weshare.android.presentation.sign.login.LoginScreen
@@ -23,7 +45,7 @@ import site.weshare.android.ui.theme.KachiAndroidTheme
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var navController: NavHostController
+//    private lateinit var navController: NavHostController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,81 +54,102 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             KachiAndroidTheme {
-                navController = rememberNavController()
-
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    NavHost(navController = navController, startDestination = "splash") {
-                        composable("splash") {
-                            SplashScreen(navToLogin = { navController.navigate("login") })
-                        }
-                        composable("login") {
-                            LoginScreen(
-                                navToWebLogin = { navController.navigate("web_login") }
-                            )
-                        }
-                        composable("web_login") {
-                            NaverLoginWebViewScreen(
-                                context = this@MainActivity,
-                                onLoginSuccess = {
-                                    navController.navigate("email_input") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                }
-                            )
-                        }
-                        composable("email_input") {
-                            EmailInputScreen(
-                                onNext = { email ->
-                                    navController.navigate("verification_code?email=$email")
-                                },
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("verification_code?email={email}") { backStackEntry ->
-                            val email = backStackEntry.arguments?.getString("email") ?: ""
-
-                            VerificationCodeScreen(
-                                email = email,
-                                onNext = { /* 다음 화면으로 */ },
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                    }
-                }
+                AppMain()
             }
         }
     }
 }
 
-
-        // 앱의 루트 Compose UI 설정
-//        setContent {
-//            KachiAndroidTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
-//            }
-//        }
-//    }
-
-
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    // 간단한 텍스트 컴포넌트 (UI 확인용)
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
+fun AppMain(){
+    val navController = rememberNavController()
+
+    val navItems = listOf(
+        NavigationItem("홈", Icons.Default.Home, "tab1"),
+        NavigationItem("공동구매", Icons.Default.AddCircle, "tab2"),
+        NavigationItem("물품교환", Icons.Default.Build, "tab3"),
+        NavigationItem("채팅", Icons.Default.CheckCircle, "tab4"),
+        NavigationItem("마이페이지", Icons.Default.AccountCircle, "tab5")
     )
-}
-//
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    // 테마가 적용된 프리뷰
-    KachiAndroidTheme {
-        Greeting("Android")
+
+    Scaffold(
+        bottomBar = {
+
+            BottomAppBar {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+
+                    navItems.forEach { nav ->
+
+                        // 현재 route
+                        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable {
+                                navController.navigate(nav.route)
+                            }
+                        ) {
+
+                            // Ture -> 현재 클릭된 탭
+                            // Flase -> 현재 클릭되지 않은 탭
+                            val isCurrentRoute = nav.route == currentRoute
+
+                            Icon(
+                                imageVector = nav.icon,
+                                contentDescription = nav.name,
+                                tint = if (isCurrentRoute) Color.Green else Color.Black
+                            )
+                            Text(
+                                text = nav.name,
+                                color = if (isCurrentRoute) Color.Green else Color.Black
+                            )
+                        }
+
+                    }
+                }
+            }
+
+
+        }
+    ) { paddingValues ->
+
+        NavHost(
+            navController = navController,
+            startDestination = navItems.first().route,
+            modifier = Modifier.padding(paddingValues)
+        ){
+            composable("tab1") {
+                HomeScreen()
+            }
+            composable("tab2") {
+                GongguMainScreen()
+            }
+            composable("tab3") {
+                BarterScreen()
+            }
+//            composable("tab4") {
+//                ChatScreen()
+//            }
+//            composable("tab5"){
+//                MyPageScreen()
+//            }
+
+
+        }
+
     }
+
+
+
 }
+
+
+data class NavigationItem(
+    val name : String,
+    val icon : ImageVector,
+    val route : String
+)
