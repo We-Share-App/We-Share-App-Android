@@ -56,12 +56,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.Dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 //import androidx.compose.ui.unit.toPx // toPx()를 사용하기 위해 필요
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     val adImages = listOf(
         R.drawable.adv_1 // 광고 이미지 리소스 ID
     )
@@ -71,6 +73,7 @@ fun HomeScreen() {
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(15.dp))
         // 검색창과 아이콘
         Row(
             modifier = Modifier
@@ -125,10 +128,7 @@ fun HomeScreen() {
         // 공동구매 섹션
         Spacer(modifier = Modifier.height(24.dp))
         SectionHeader(title = "공동구매 가치할래?") {
-            // TODO: 추후에 화면 이동 코드를 추가해야 합니다.
-            // 공동구매 화면으로 이동하는 로직 (NavHostController 사용)
-            // navController.navigate("groupPurchaseScreen")
-            println("공동구매 더보기 클릭") // 임시 확인용
+            navController.navigate("gonggu_main")
         }
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalProductList(products = MockData.groupPurchaseProducts) { product ->
@@ -334,7 +334,7 @@ fun ExchangeProductItem(product: ExchangeProduct) {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    HomeScreen(navController = rememberNavController())
 }
 
 @Preview(showBackground = true)

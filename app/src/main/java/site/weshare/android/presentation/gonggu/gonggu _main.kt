@@ -24,6 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+
 data class GongguItem(
     val id: Int,
     val title: String,
@@ -40,6 +43,7 @@ data class GongguItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GongguMainScreen(
+    navController: NavController,
     onItemClick: (GongguItem) -> Unit = {},
     onRegisterClick: () -> Unit = {}
 ) {
@@ -395,6 +399,6 @@ fun GongguItemCard(
 fun GongguMainScreenPreview() {
     // 테마를 적용하고 싶다면
     MaterialTheme {
-        GongguMainScreen()
+        GongguMainScreen(navController = rememberNavController())
     }
 }
