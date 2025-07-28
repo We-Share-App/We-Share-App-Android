@@ -33,9 +33,200 @@ data class GongguItem(
     val daysLeft: Int,
     val likes: Int,
     val comments: Int,
-    val imageRes: Int? = null, // 실제로는 이미지 URL을 사용하시면 됩니다
+    val imageRes: Int? = null,
     val tag: String? = null
 )
+
+// 메인 앱 컴포저블 - 화면 전환 관리
+@Composable
+fun GongguApp() {
+    var selectedItem by remember { mutableStateOf<GongguItem?>(null) }
+
+    if (selectedItem == null) {
+        // 메인 화면
+        GongguMainScreen(
+            onItemClick = { item ->
+                selectedItem = item // 아이템 클릭하면 상세 화면으로
+            }
+        )
+    } else {
+        // 상세 화면
+        GongguDetailScreen(
+            item = selectedItem!!,
+            onBackClick = {
+                selectedItem = null // 뒤로가기 버튼 누르면 메인으로
+            }
+        )
+    }
+}
+
+// 상세 화면 추가
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GongguDetailScreen(
+    item: GongguItem,
+    onBackClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        // 상단 바
+        TopAppBar(
+            title = { Text("공구 상세") },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "뒤로가기")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.White
+            )
+        )
+
+        // 상세 내용
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // 상품 이미지
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                if (item.imageRes != null) {
+                    Image(
+                        painter = painterResource(id = item.imageRes),
+                        contentDescription = item.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 제목
+            Text(
+                text = item.title,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 설명
+            Text(
+                text = item.description,
+                fontSize = 16.sp,
+                color = Color.DarkGray
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 진행 상황
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "공구 진행 상황",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("현재 참여: ${item.currentCount}명")
+                        Text("목표: ${item.maxCount}명")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // 진행률 바
+                    LinearProgressIndicator(
+                        progress = item.currentCount.toFloat() / item.maxCount.toFloat(),
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xff2FB475)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "마감까지 ${item.daysLeft}일 남음",
+                        color = if (item.daysLeft <= 3) Color.Red else Color.Gray,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 좋아요, 댓글 수
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.account_multiple),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = " ${item.likes}명 참여",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.heart),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = " ${item.comments}개 댓글",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // 참여하기 버튼
+            Button(
+                onClick = { /* 참여 로직 */ },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xff2FB475)
+                )
+            ) {
+                Text(
+                    text = "공구 참여하기",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,7 +298,7 @@ fun GongguMainScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(start = 7.dp) // 전체를 오른쪽으로 8dp 이동
+            .padding(start = 7.dp)
     ) {
         // 상단 헤더
         TopAppBar(
@@ -203,42 +394,38 @@ fun GongguMainScreen(
         }
 
         // 상품 목록
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(0.dp, 0.dp, 0.dp, 80.dp)
+        Box(
+            modifier = Modifier.weight(1f)
         ) {
-            items(gongguItems) { item ->
-                GongguItemCard(
-                    item = item,
-                    onClick = { onItemClick(item) }
-                )
-                // 마지막 아이템이 아닐 때만 구분선 추가
-                if (item != gongguItems.last()) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 0.dp),
-                        thickness = 0.5.dp,
-                        color = Color.LightGray
+            LazyColumn(
+                contentPadding = PaddingValues(0.dp, 0.dp, 0.dp, 16.dp)
+            ) {
+                items(gongguItems) { item ->
+                    GongguItemCard(
+                        item = item,
+                        onClick = { onItemClick(item) }
                     )
+                    if (item != gongguItems.last()) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 0.dp),
+                            thickness = 0.5.dp,
+                            color = Color.LightGray
+                        )
+                    }
                 }
             }
-        }
 
-        // 등록하기 버튼
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            contentAlignment = Alignment.BottomEnd
-        ) {
             FloatingActionButton(
                 onClick = onRegisterClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(56.dp)
+                containerColor = Color(0xff2FB475),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 34.dp, bottom = 95.dp)
+                    .size(width = 100.dp, height = 40.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -267,13 +454,12 @@ fun GongguItemCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp) // 고정 높이 설정
+            .height(120.dp)
             .clickable { onClick() }
             .background(Color.White)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // 상품 이미지
         Box(
             modifier = Modifier
                 .size(90.dp)
@@ -281,7 +467,6 @@ fun GongguItemCard(
                 .background(Color.LightGray),
             contentAlignment = Alignment.Center
         ) {
-            // 이미지가 있으면 표시, 없으면 회색 배경
             if (item.imageRes != null) {
                 Image(
                     painter = painterResource(id = item.imageRes),
@@ -294,14 +479,12 @@ fun GongguItemCard(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 상품 정보
         Column(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(), // 전체 높이 사용
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // 상단 정보 (제목 + 설명)
             Column {
                 Text(
                     text = item.title,
@@ -309,7 +492,7 @@ fun GongguItemCard(
                     fontWeight = FontWeight.Bold,
                     lineHeight = 18.sp,
                     letterSpacing = (-0.05).sp,
-                    maxLines = 2, // 최대 2줄로 제한
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
 
@@ -326,7 +509,6 @@ fun GongguItemCard(
                 )
             }
 
-            // 하단 정보 (마감일 + 아이콘들)
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -339,12 +521,12 @@ fun GongguItemCard(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                // 좋아요, 댓글 수
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.offset(x = 16.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Person,
+                        painter = painterResource(id = R.drawable.account_multiple),
                         contentDescription = null,
                         modifier = Modifier.size(12.dp),
                         tint = Color.Gray
@@ -352,19 +534,21 @@ fun GongguItemCard(
                     Text(
                         text = " ${item.likes}",
                         fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
                         color = Color.Gray
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
+                        painter = painterResource(id = R.drawable.heart),
                         contentDescription = null,
                         modifier = Modifier.size(12.dp),
                         tint = Color.Gray
                     )
                     Text(
                         text = " ${item.comments}",
+                        fontWeight = FontWeight.SemiBold,
                         fontSize = 11.sp,
                         color = Color.Gray
                     )
@@ -372,14 +556,13 @@ fun GongguItemCard(
             }
         }
 
-        // 더보기 버튼
         IconButton(
             onClick = {},
             modifier = Modifier.size(20.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = "더보기",
+                contentDescription = "점 세개",
                 modifier = Modifier.size(16.dp),
                 tint = Color.Gray
             )
@@ -387,14 +570,14 @@ fun GongguItemCard(
     }
 }
 
+// Preview에서는 GongguApp을 호출하도록 변경
 @Preview(
     showBackground = true,
-    showSystemUi = true  // 상태바까지 보고 싶다면
+    showSystemUi = true
 )
 @Composable
 fun GongguMainScreenPreview() {
-    // 테마를 적용하고 싶다면
     MaterialTheme {
-        GongguMainScreen()
+        GongguApp() // 메인 화면 대신 전체 앱 호출
     }
 }
