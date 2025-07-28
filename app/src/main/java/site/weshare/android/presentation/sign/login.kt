@@ -12,14 +12,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import site.weshare.android.R
 
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen()
-}
 
 @Composable
-fun LoginScreen(navToWebLogin: () -> Unit = {}) {
+fun LoginScreen(
+    navToWebLogin: () -> Unit,
+    onLoginSuccess: () -> Unit
+) {
     val context = LocalContext.current
 
     Column(
@@ -134,3 +132,4 @@ fun LoginScreen(navToWebLogin: () -> Unit = {}) {
         }
     }
 }
+

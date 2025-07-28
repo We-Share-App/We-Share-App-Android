@@ -14,11 +14,21 @@ import kotlinx.coroutines.delay
 import site.weshare.android.R
 
 @Composable
-fun SplashScreen(navToLogin: () -> Unit) {
+fun SplashScreen(
+    navToLogin: () -> Unit, // 로그인 화면으로 이동하는 콜백
+    navToMain: () -> Unit,   // 메인 화면 (MainActivity)으로 이동하는 콜백
+    isLoggedIn: Boolean      // 로그인 상태를 받아오는 파라미터 추가
+)  {
     // 일정 시간 후 로그인 화면으로 이동
     LaunchedEffect(Unit) {
-        delay(2000L) // 2초 대기
-        navToLogin()
+        delay(1000L) // 1초 대기
+
+        // 로그인 상태에 따라 분기
+        if (isLoggedIn) {
+            navToMain() // 로그인 되어 있으면 MainActivity로 이동
+        } else {
+            navToLogin() // 로그인 되어 있지 않으면 로그인 화면으로 이동
+        }
     }
 
     Box(
