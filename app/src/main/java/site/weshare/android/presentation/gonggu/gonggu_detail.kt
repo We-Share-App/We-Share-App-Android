@@ -1,4 +1,3 @@
-// 파일명: GongguDetailScreen.kt
 package site.weshare.android.presentation.gonggu
 
 import androidx.compose.foundation.Image
@@ -11,21 +10,33 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +49,7 @@ import site.weshare.android.R
 data class GongguDetailResponse(
     val id: Int,
     val title: String,
-    val price: Int, // 백엔드에서는 숫자로 받음
+    val price: Int,               // 백엔드에서는 숫자로 받음
     val totalQuantity: Int,
     val remainingQuantity: Int,
     val daysLeft: Int,
@@ -55,16 +66,16 @@ data class GongguDetailResponse(
 data class SellerInfoResponse(
     val id: Int,
     val name: String,
-    val phone: String,
-    val rating: Float,
-    val reviewCount: Int,
-    val profileImageUrl: String? = null
+    val profileImageUrl: String? = null,
+    val totalLeaderCount: Int = 0,  // 총대횟수
+    val reviewCount: Int = 0,       // 후기 수
+    val rating: Float = 0f          // 별점
 )
 
 data class GongguDetailItem(
     val id: Int,
     val title: String,
-    val price: String, // UI에서는 포맷된 문자열
+    val price: String,            // UI에서는 포맷된 문자열
     val totalQuantity: Int,
     val remainingQuantity: Int,
     val daysLeft: Int,
@@ -79,10 +90,10 @@ data class GongguDetailItem(
 
 data class SellerInfo(
     val name: String,
-    val phone: String,
-    val rating: Float,
-    val reviewCount: Int,
-    val profileImageRes: Int? = null
+    val profileImageRes: Int? = null,
+    val totalLeaderCount: Int = 0,
+    val reviewCount: Int = 0,
+    val rating: Float = 0f
 )
 
 // Response를 UI 모델로 변환
@@ -106,10 +117,10 @@ fun GongguDetailResponse.toUiModel(): GongguDetailItem {
 fun SellerInfoResponse.toUiModel(): SellerInfo {
     return SellerInfo(
         name = this.name,
-        phone = "휴대폰 번호: ${this.phone.takeLast(1)}", // 보안을 위해 마지막 자리만 표시
-        rating = this.rating,
+        profileImageRes = null,
+        totalLeaderCount = this.totalLeaderCount,
         reviewCount = this.reviewCount,
-        profileImageRes = null // 실제로는 imageUrl 사용
+        rating = this.rating
     )
 }
 
@@ -188,14 +199,9 @@ class GongguDetailRepository(
                 views = 43,
                 likes = 5,
                 comments = 13,
-                description = "삼다수 공동구매합니다\n2L 총 24개 구매해요\n\n신선하고 깨끗한 제주도의 천연 미네랄 워터입니다.\n대용량으로 구매하여 더욱 저렴하게 제공합니다.",
+                description = "삼다수 공동구매합니다\n2L 총 24개 구매해요",
                 imageRes = R.drawable.gonggu_samdasu,
-                seller = SellerInfo(
-                    name = "홍길동",
-                    phone = "휴대폰 번호: 8",
-                    rating = 5.0f,
-                    reviewCount = 37
-                )
+                seller = SellerInfo(name = "홍길동")
             )
             2 -> GongguDetailItem(
                 id = 2,
@@ -209,12 +215,7 @@ class GongguDetailRepository(
                 comments = 6,
                 description = "코카콜라 제로 공동구매합니다\n190ml 총 60개 구매해요\n\n칼로리 제로, 설탕 제로의 건강한 콜라입니다.",
                 imageRes = R.drawable.gonggu_cola,
-                seller = SellerInfo(
-                    name = "김영희",
-                    phone = "휴대폰 번호: 5",
-                    rating = 4.8f,
-                    reviewCount = 23
-                )
+                seller = SellerInfo(name = "김영희")
             )
             3 -> GongguDetailItem(
                 id = 3,
@@ -228,12 +229,7 @@ class GongguDetailRepository(
                 comments = 10,
                 description = "리벤스 물티슈 대용량 공동구매합니다\n총 80개 구매해요\n\n부드럽고 촉촉한 프리미엄 물티슈입니다.",
                 imageRes = R.drawable.gonggu_tissue,
-                seller = SellerInfo(
-                    name = "박철수",
-                    phone = "휴대폰 번호: 2",
-                    rating = 4.9f,
-                    reviewCount = 45
-                )
+                seller = SellerInfo(name = "박철수")
             )
             4 -> GongguDetailItem(
                 id = 4,
@@ -247,12 +243,7 @@ class GongguDetailRepository(
                 comments = 23,
                 description = "신라면 공동구매합니다\n총 40개 구매해요\n\n매콤하고 깔끔한 국물 맛의 대표 라면입니다.",
                 imageRes = R.drawable.gonggu_ramen,
-                seller = SellerInfo(
-                    name = "이민수",
-                    phone = "휴대폰 번호: 3",
-                    rating = 4.7f,
-                    reviewCount = 56
-                )
+                seller = SellerInfo(name = "이민수")
             )
             5 -> GongguDetailItem(
                 id = 5,
@@ -266,12 +257,7 @@ class GongguDetailRepository(
                 comments = 15,
                 description = "햇반 공동구매합니다\n총 48개 구매해요\n\n간편하고 맛있는 즉석밥입니다.",
                 imageRes = R.drawable.gonggu_bab,
-                seller = SellerInfo(
-                    name = "최수정",
-                    phone = "휴대폰 번호: 7",
-                    rating = 4.6f,
-                    reviewCount = 28
-                )
+                seller = SellerInfo(name = "최수정")
             )
             else -> GongguDetailItem(
                 id = itemId,
@@ -284,7 +270,7 @@ class GongguDetailRepository(
                 likes = 0,
                 comments = 0,
                 description = "해당 상품을 찾을 수 없습니다.",
-                seller = SellerInfo("", "", 0f, 0)
+                seller = SellerInfo(name = "")
             )
         }
     }
@@ -384,10 +370,6 @@ class GongguDetailViewModel(
         }
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
-
     fun clearParticipateResult() {
         _uiState.value = _uiState.value.copy(participateResult = null)
     }
@@ -405,12 +387,6 @@ fun GongguDetailScreenContainer(
 
     LaunchedEffect(itemId) {
         viewModel.loadGongguDetail(itemId)
-    }
-
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            viewModel.clearError()
-        }
     }
 
     LaunchedEffect(uiState.participateResult) {
@@ -438,33 +414,6 @@ fun GongguDetailScreenContainer(
                 isLiked = uiState.isLiked
             )
         }
-        uiState.error != null -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "오류가 발생했습니다",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = uiState.error!!,
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = { viewModel.loadGongguDetail(itemId) }
-                    ) {
-                        Text("다시 시도")
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -474,445 +423,565 @@ fun GongguDetailScreen(
     item: GongguDetailItem,
     onBackClick: () -> Unit = {},
     onMoreClick: () -> Unit = {},
+    onShareLink: () -> Unit = {},
     onHeartClick: () -> Unit = {},
     onParticipateClick: (Int) -> Unit = {},
-    isLiked: Boolean = false
+    isLiked: Boolean = false,
+    initialQuantity: Int = 0,
+    onReportClick: () -> Unit = {},
+    onShareClick: () -> Unit = {},
+    onInquiryClick: () -> Unit = {}
 ) {
-    var selectedQuantity by remember { mutableStateOf(1) }
+    var selectedQuantity by remember { mutableStateOf(initialQuantity) }
+    val overLimit = selectedQuantity > item.remainingQuantity
+    var showMoreMenu by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        // Top App Bar
-        TopAppBar(
-            title = { Text("공동구매 참여하기", fontSize = 16.sp) },
-            navigationIcon = {
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "뒤로가기")
-                }
-            },
-            actions = {
-                IconButton(onClick = onMoreClick) {
-                    Icon(Icons.Default.Menu, contentDescription = "더보기")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.White
-            )
-        )
-
-        // Scrollable Content
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp)
+                .fillMaxSize()
+                .background(Color.White)
+                .then(if (overLimit) Modifier.blur(3.dp) else Modifier)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Product Image
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(350.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFF5F5F5)),
-                contentAlignment = Alignment.Center
-            ) {
-                item.imageRes?.let {
-                    Image(
-                        painter = painterResource(id = it),
-                        contentDescription = item.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } ?: run {
-                    // TODO: AsyncImage로 네트워크 이미지 로드
-                    Text(
-                        text = "이미지 없음",
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Title and Heart
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Text(
-                    text = item.title,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+            // Top App Bar (메뉴 제거)
+            TopAppBar(
+                title = { Text("공동구매 참여하기", fontSize = 16.sp) },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "뒤로가기")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
                 )
-                IconButton(
-                    onClick = onHeartClick,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "찜하기",
-                        modifier = Modifier.size(24.dp),
-                        tint = if (isLiked) Color.Red else Color.Gray
-                    )
-                }
-                IconButton(
-                    onClick = onMoreClick,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = "더보기",
-                        modifier = Modifier.size(24.dp),
-                        tint = Color.Gray
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(1.dp))
-
-            // Price
-            Text(
-                text = item.price,
-                fontSize = 21.5.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.DarkGray
             )
 
-            Spacer(modifier = Modifier.height(5.dp))
-
-            // Quantity Info
+            // Scrollable Content
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                ,verticalArrangement = Arrangement.spacedBy(-3.dp)
+                    .weight(1f)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 20.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Text(
-                        text = "총 구매 개수 : ${item.totalQuantity}개",
-                        fontSize = 18.sp,
-                        letterSpacing = (-0.5).sp,
-                        color = Color.Black
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Text(
-                        text = "남은 개수 : ${item.remainingQuantity}개",
-                        fontSize = 18.sp,
-                        letterSpacing = (-0.5).sp,
-                        color = Color.Black
-                    )
-                }
-            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Stats Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "마감 D-${item.daysLeft}",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (item.daysLeft <= 3) Color.Red else Color.Gray
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = Color.Gray
-                        )
-                        Text(
-                            text = " ${item.views}",
-                            fontSize = 11.sp,
-                            color = Color.Gray
-                        )
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = Color.Gray
-                        )
-                        Text(
-                            text = " ${item.likes}",
-                            fontSize = 11.sp,
-                            color = Color.Gray
-                        )
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.FavoriteBorder,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = Color.Gray
-                        )
-                        Text(
-                            text = " ${item.comments}",
-                            fontSize = 11.sp,
-                            color = Color.Gray
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-// (2) Divider 추가
-            Divider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp),
-                color = Color(0xFFE0E0E0)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Description
-            Text(
-                text = item.description,
-                fontSize = 16.sp,
-                color = Color.Black,
-                lineHeight = 20.sp
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            // Contact Info
-            Text(
-                text = "공동구매 상품 바로가기",
-                fontSize = 12.sp,
-                color = Color.Blue,
-                style = TextStyle(
-                    textDecoration = TextDecoration.Underline
-                ),
-                modifier = Modifier.clickable { }
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            // Seller Info
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Color(0xFFF8F8F8),
-                        RoundedCornerShape(12.dp)
-                    )
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Profile Image
+                // Product Image
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color.Gray),
+                        .fillMaxWidth()
+                        .height(350.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFF5F5F5)),
                     contentAlignment = Alignment.Center
                 ) {
-                    item.seller.profileImageRes?.let {
+                    item.imageRes?.let {
                         Image(
                             painter = painterResource(id = it),
-                            contentDescription = "프로필",
+                            contentDescription = item.title,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
                     } ?: run {
                         Text(
-                            text = item.seller.name.take(1),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            text = "이미지 없음",
+                            fontSize = 16.sp,
+                            color = Color.Gray
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
+                // Title and Heart (더보기 메뉴는 여기서만)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
                     Text(
-                        text = item.seller.name,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
+                        text = item.title,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onHeartClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
                         Icon(
-                            Icons.Default.Phone,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = Color.Gray
+                            if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "찜하기",
+                            modifier = Modifier.size(24.dp),
+                            tint = if (isLiked) Color.Red else Color.Gray
                         )
+                    }
+                    Box {
+                        IconButton(
+                            onClick = { showMoreMenu = true },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = "더보기",
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.Gray
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showMoreMenu,
+                            onDismissRequest = { showMoreMenu = false },
+                            shape = RoundedCornerShape(0.dp),
+                            shadowElevation = 5.dp,
+                            tonalElevation = 0.dp,
+                            containerColor = Color.White,
+                            modifier = Modifier.padding(0.dp)
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.report),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text("신고하기", fontSize = 14.sp)
+                                    }
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    onReportClick()
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                                modifier = Modifier.height(30.dp)
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.share),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text("공유하기", fontSize = 14.sp)
+                                    }
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    onShareClick()
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                                modifier = Modifier.height(30.dp)
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.ask),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text("문의하기", fontSize = 14.sp)
+                                    }
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    onInquiryClick()
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                                modifier = Modifier.height(30.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(1.dp))
+
+                // Price
+                Text(
+                    text = item.price,
+                    fontSize = 21.5.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.DarkGray
+                )
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                // Quantity Info
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(-3.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
                         Text(
-                            text = " ${item.seller.phone}",
-                            fontSize = 12.sp,
-                            color = Color.Gray
+                            text = "총 구매 개수 : ${item.totalQuantity}개",
+                            fontSize = 18.sp,
+                            letterSpacing = (-0.5).sp,
+                            color = Color.Black
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = Color(0xFFFFD700)
-                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
                         Text(
-                            text = " ${item.seller.rating}",
-                            fontSize = 12.sp,
-                            color = Color.Gray
+                            text = "남은 개수 : ${item.remainingQuantity}개",
+                            fontSize = 18.sp,
+                            letterSpacing = (-0.5).sp,
+                            color = Color.Black
                         )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Stats Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "마감 D-${item.daysLeft}",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (item.daysLeft <= 3) Color.Red else Color.Gray
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = Color.Gray
+                            )
+                            Text(
+                                text = " ${item.views}",
+                                fontSize = 11.sp,
+                                color = Color.Gray
+                            )
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = Color.Gray
+                            )
+                            Text(
+                                text = " ${item.likes}",
+                                fontSize = 11.sp,
+                                color = Color.Gray
+                            )
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.FavoriteBorder,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = Color.Gray
+                            )
+                            Text(
+                                text = " ${item.comments}",
+                                fontSize = 11.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp),
+                    color = Color(0xFFE0E0E0)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = item.description,
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    lineHeight = 20.sp
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Text(
+                    text = "공동구매 상품 바로가기",
+                    fontSize = 12.sp,
+                    color = Color.Blue,
+                    style = TextStyle(
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    modifier = Modifier.clickable { }
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                // Seller Info
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(Color.Gray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        item.seller.profileImageRes?.let {
+                            Image(
+                                painter = painterResource(id = it),
+                                contentDescription = "프로필",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } ?: run {
+                            Text(
+                                text = item.seller.name.take(1),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = " ${item.seller.reviewCount}",
-                            fontSize = 12.sp,
-                            color = Color.Gray
+                            text = item.seller.name,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold
                         )
+
+                        Spacer(modifier = Modifier.height(0.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // 총대 횟수
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.human_greeting_variant),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                    tint = Color.Black
+                                )
+                                Text(
+                                    text = " 총대 횟수 ${item.seller.totalLeaderCount}",
+                                    fontSize = 11.sp,
+                                    color = Color.Black
+                                )
+                            }
+
+                            // 후기
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.comment),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                    tint = Color.Black
+                                )
+                                Text(
+                                    text = " 후기 ${item.seller.reviewCount}",
+                                    fontSize = 11.sp,
+                                    color = Color.Black
+                                )
+                            }
+
+                            // 별점
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.star),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = Color(0xffFFD23F)
+                                )
+                                Text(
+                                    text = " ${item.seller.rating}",
+                                    fontSize = 11.sp,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(100.dp))
+            }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shadowElevation = 8.dp,
+                color = Color.White
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                            .height(40.dp)
+                            .width(90.dp)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                if (selectedQuantity > 0) selectedQuantity--
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        Divider(
+                            modifier = Modifier
+                                .height(40.dp)
+                                .width(1.dp),
+                            color = Color.LightGray
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "$selectedQuantity", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        }
+
+                        Divider(
+                            modifier = Modifier
+                                .height(40.dp)
+                                .width(1.dp),
+                            color = Color.LightGray
+                        )
+
+                        IconButton(
+                            onClick = {
+                                selectedQuantity++
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(24.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        val priceText = item.price.replace(",", "").replace("원", "")
+                        val totalPrice = priceText.toIntOrNull() ?: 0
+                        val unitPrice = totalPrice / item.totalQuantity  // 개당 가격
+                        val myTotalPrice = selectedQuantity * unitPrice  // 내가 설정한 개수만큼의 총 가격
+
+                        Text(
+                            text = "${String.format("%,d", myTotalPrice)}원",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Blue
+                        )
+                        Text(text = "무료배송", fontSize = 11.sp, color = Color.Black)
+                    }
+                    Button(
+                        onClick = { onParticipateClick(selectedQuantity) },
+                        enabled = selectedQuantity <= item.remainingQuantity && item.remainingQuantity > 0,
+                        modifier = Modifier
+                            .height(37.dp)
+                            .width(100.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("참여하기", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(100.dp)) // Bottom padding for FAB
         }
 
-        // Bottom Participation Section
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shadowElevation = 8.dp,
-            color = Color.White
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 15.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Quantity Selector
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+        // 수량 초과 메시지 다이얼로그
+        if (overLimit) {
+            Dialog(onDismissRequest = { selectedQuantity = item.remainingQuantity }) {
+                Card(
                     modifier = Modifier
-                        .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-                        .height(40.dp)
-                        .width(90.dp)
+                        .width(280.dp)
+                        .wrapContentHeight(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
-                    // - 버튼 (패딩 없음)
-                    IconButton(
-                        onClick = {
-                            if (selectedQuantity > 1) selectedQuantity--
-                        },
-                        modifier = Modifier.size(24.dp) // 크기 줄임
-                    ) {
-                        Text(
-                            "-",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    // 세로 구분선
-                    Divider(
-                        modifier = Modifier
-                            .height(40.dp)
-                            .width(1.dp),
-                        color = Color.LightGray
-                    )
-
-                    // 숫자 영역 (넉넉한 패딩)
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 12.dp), // 구분선과 숫자 사이 간격 넓게
+                            .fillMaxWidth()
+                            .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "$selectedQuantity",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.vector),
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp)
+                            )
+
+                            Text(
+                                text = "재고 부족으로 ${item.remainingQuantity}개까지\n구매 가능한 상품입니다.\n개수를 다시 선택해주세요.",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                color = Color.Black,
+                                lineHeight = 20.sp
+                            )
+
+                            Button(
+                                onClick = { selectedQuantity = item.remainingQuantity },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = "확인",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        }
                     }
-
-                    // 세로 구분선
-                    Divider(
-                        modifier = Modifier
-                            .height(40.dp)
-                            .width(1.dp),
-                        color = Color.LightGray
-                    )
-
-                    // + 버튼 (패딩 없음)
-                    IconButton(
-                        onClick = {
-                            if (selectedQuantity < item.remainingQuantity) selectedQuantity++
-                        },
-                        modifier = Modifier.size(24.dp) // 크기 줄임
-                    ) {
-                        Text(
-                            "+",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(24.dp))
-
-                // Price and Button
-                Column(modifier = Modifier.weight(1f)) {
-                    val priceText = item.price.replace(",", "").replace("원", "")
-                    val priceInt = priceText.toIntOrNull() ?: 0
-                    val totalPrice = selectedQuantity * priceInt
-
-                    Text(
-                        text = "${String.format("%,d", totalPrice)}원",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "무료배송",
-                        fontSize = 11.sp,
-                        color = Color.Black
-                    )
-                }
-                Button(
-                    onClick = { onParticipateClick(selectedQuantity) },
-                    enabled = selectedQuantity <= item.remainingQuantity && item.remainingQuantity > 0,
-                    modifier = Modifier
-                        .height(37.dp)
-                        .width(100.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4CAF50)
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(0.dp) // 내부 패딩 제거
-                ) {
-                    Text(
-                        "참여하기",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
                 }
             }
         }
@@ -934,15 +1003,55 @@ fun GongguDetailScreenPreview() {
         comments = 13,
         description = "삼다수 공동구매합니다\n2L 총 24개 구매해요",
         imageRes = R.drawable.gonggu_samdasu,
+        imageUrl = null,
         seller = SellerInfo(
             name = "홍길동",
-            phone = "휴대폰 번호: 8",
-            rating = 5.0f,
-            reviewCount = 37
+            profileImageRes = null,
+            totalLeaderCount = 8,
+            reviewCount = 37,
+            rating = 5.0f
         )
     )
 
     MaterialTheme {
-        GongguDetailScreen(item = mockItem)
+        GongguDetailScreen(
+            item = mockItem,
+            onReportClick = { /* 신고하기 처리 */ },
+            onShareClick = { /* 공유하기 처리 */ },
+            onInquiryClick = { /* 문의하기 처리 */ }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Over Limit Message Preview")
+@Composable
+fun GongguDetailScreenOverLimitPreview() {
+    val mockItem = GongguDetailItem(
+        id = 1,
+        title = "제주삼다수 2L",
+        price = "25,920원",
+        totalQuantity = 24,
+        remainingQuantity = 8,
+        daysLeft = 10,
+        views = 43,
+        likes = 5,
+        comments = 13,
+        description = "삼다수 공동구매합니다\n2L 총 24개 구매해요",
+        imageRes = R.drawable.gonggu_samdasu,
+        imageUrl = null,
+        seller = SellerInfo(
+            name = "홍길동",
+            profileImageRes = null,
+            totalLeaderCount = 8,
+            reviewCount = 37,
+            rating = 5.0f
+        )
+    )
+
+    MaterialTheme {
+        GongguDetailScreen(
+            item = mockItem,
+            initialQuantity = 15, // 남은 수량(8)보다 많은 값으로 설정하여 메시지 표시
+        )
     }
 }
