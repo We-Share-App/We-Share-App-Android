@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import site.weshare.android.presentation.sign.EmailInputScreen
+import site.weshare.android.presentation.sign.NicknameInputScreen
 import site.weshare.android.presentation.sign.VerificationCodeScreen
 import site.weshare.android.presentation.sign.login.LoginScreen
 import site.weshare.android.presentation.sign.login.NaverLoginWebViewScreen
@@ -95,16 +96,35 @@ class SplashActivity : ComponentActivity() {
                         composable("verification_code?email={email}") { backStackEntry ->
                             val email = backStackEntry.arguments?.getString("email") ?: ""
 
+//                            VerificationCodeScreen(
+//                                email = email,
+//                                onNext = { /* 다음 화면 ( 회원가입 완료 및 로그인 처리 후 MainActivity로) */
+//                                    sharedPreferences.edit().putBoolean("is_logged_in", true).apply()
+//                                    startActivity(Intent(this@SplashActivity, MainActivity::class.java).apply {
+//                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//                                    })
+//                                    finish()
+//                                },
                             VerificationCodeScreen(
                                 email = email,
-                                onNext = { /* 다음 화면 ( 회원가입 완료 및 로그인 처리 후 MainActivity로) */
+                                onNext = {
+                                    navController.navigate("nickname_input") {
+                                        popUpTo("email_input") { inclusive = true } // 이메일 인증 스택 제거
+                                    }
+                                },
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable("nickname_input") {
+                            NicknameInputScreen(
+                                onNicknameSet = {
                                     sharedPreferences.edit().putBoolean("is_logged_in", true).apply()
                                     startActivity(Intent(this@SplashActivity, MainActivity::class.java).apply {
                                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     })
                                     finish()
-                                },
-                                onBack = { navController.popBackStack() }
+                                }
                             )
                         }
                     }

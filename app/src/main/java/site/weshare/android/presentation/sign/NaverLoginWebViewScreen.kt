@@ -7,6 +7,8 @@ import android.webkit.*
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.viewinterop.AndroidView
+import site.weshare.android.util.saveAccessToken
+import site.weshare.android.util.saveRefreshToken
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -61,6 +63,15 @@ fun NaverLoginWebViewScreen(
                         val refresh = tokenMap["refresh"]
 
                         android.util.Log.d("LoginTokens", "access=$access, refresh=$refresh")
+
+                        // ✅ ✅ ✅ 여기서 토큰 저장 추가
+                        if (access != null && refresh != null) {
+                            saveAccessToken(context, access)
+                            saveRefreshToken(context, refresh)
+                            android.util.Log.d("LoginSave", "✅ 토큰 저장 완료")
+                        } else {
+                            android.util.Log.e("LoginError", "❌ 토큰 추출 실패")
+                        }
 
                         // ✅ 다음 화면으로 이동
                         onLoginSuccess()
