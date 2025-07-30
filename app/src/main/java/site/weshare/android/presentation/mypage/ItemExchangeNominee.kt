@@ -191,7 +191,7 @@ fun NomineeCard(item: NomineeItem, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .background(Color.White)
-            .padding(vertical = 16.dp),
+            .padding(vertical = 1.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 좌측 이미지
@@ -230,9 +230,9 @@ fun NomineeCard(item: NomineeItem, onClick: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "상품 상태: ${item.detail.itemStatus}", fontSize = 11.sp, color = TextGray)
-            Text(text = "${item.detail.desiredCategory} : ${item.detail.category}", fontSize = 11.sp, color = TextGray)
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "상품 상태: ${item.detail.itemStatus}", fontSize = 13.sp, color = TextGray)
+            Text(text = "${item.detail.desiredCategory} : ${item.detail.category}", fontSize = 13.sp, color = TextGray)
+            Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -254,15 +254,6 @@ fun NomineeCard(item: NomineeItem, onClick: () -> Unit) {
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(text = item.likesCount.toString(), fontSize = 11.sp, color = TextGray)
                 }
-            }
-            // 교환 완료 날짜 (Nominee 화면에서만)
-            item.postingDate?.let { date ->
-                Text(
-                    text = date,
-                    fontSize = 10.sp,
-                    color = TextGray,
-                    modifier = Modifier.align(Alignment.End) // 오른쪽 정렬
-                )
             }
         }
     }
