@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import site.weshare.android.util.getAccessToken
+import java.net.URLEncoder
 
 @Composable
 fun NicknameInputScreen(
@@ -57,25 +58,25 @@ fun NicknameInputScreen(
             onClick = {
                 scope.launch {
                     val token = getAccessToken(context) ?: ""
-                    val rawNickname = nickname.trim()
+                    val encodedNickname = URLEncoder.encode(nickname.trim(), "UTF-8")
 
-                    Log.d("NICKNAME_CHECK", "👀 닉네임 원본: $rawNickname")
+                    Log.d("NICKNAME_CHECK", "👀 닉네임 원본: $nickname")
+                    Log.d("NICKNAME_CHECK", "👀 인코딩된 닉네임: $encodedNickname")
                     Log.d("TOKEN_LOG", "📌 Access Token: $token")
-                    Log.d("API_CALL", "🔍 중복확인 호출 - nickname: $rawNickname")
 
                     try {
                         val response = ApiClient.userApi.checkNicknameAvailability(
-                            nickname = rawNickname,
+                            nickname = encodedNickname,
                             accessToken = token
                         )
                         Log.d("API_CALL", "📥 응답 코드: ${response.code()}")
 
                         if (response.isSuccessful) {
                             val result = response.body()
-                            Log.d("API_CALL", "✅ 서버 응답 isSuccess: ${result?.isSuccess}, updatedNickname: ${result?.updatedNickname}")
+                            Log.d("API_CALL", "✅ 서버 응답 available: ${result?.available}")
 
                             isChecked = true
-                            isAvailable = result?.isSuccess == true
+                            isAvailable = result?.available == true
                             errorMessage = if (isAvailable) null else "이미 사용 중인 닉네임입니다."
                             successMessage = if (isAvailable) "사용 가능한 닉네임입니다." else null
                         } else {
@@ -115,14 +116,14 @@ fun NicknameInputScreen(
                 scope.launch {
                     isSubmitting = true
                     val token = getAccessToken(context) ?: ""
-                    val rawNickname = nickname.trim()
+                    val encodedNickname = URLEncoder.encode(nickname.trim(), "UTF-8")
 
                     Log.d("TOKEN_LOG", "📌 Access Token (등록): $token")
-                    Log.d("API_CALL", "📤 닉네임 등록 요청 - nickname: $rawNickname")
+                    Log.d("API_CALL", "📤 닉네임 등록 요청 - nickname: $encodedNickname")
 
                     try {
                         val response = ApiClient.userApi.updateNickname(
-                            nickname = rawNickname,
+                            nickname = encodedNickname,
                             accessToken = token
                         )
                         Log.d("API_CALL", "📥 응답 코드: ${response.code()}")

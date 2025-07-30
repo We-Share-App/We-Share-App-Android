@@ -8,6 +8,7 @@ import retrofit2.http.Query
 import site.weshare.android.data.remote.api.model.EmailVerifyRequest
 import site.weshare.android.data.remote.api.model.EmailRequest  // 👈 이거 새로 추가해야 함
 import site.weshare.android.data.remote.api.model.NicknameAvailabilityResponse
+import site.weshare.android.data.remote.api.model.NicknameCheckResponse
 import site.weshare.android.data.remote.api.model.NicknameUpdateResponse
 
 interface UserApi {
@@ -25,8 +26,8 @@ interface UserApi {
     @POST("/users/nicknames/available")
     suspend fun checkNicknameAvailability(
         @Query("nickname") nickname: String,
-        @Header("access") accessToken: String
-    ): Response<NicknameAvailabilityResponse>
+        @Header("access") accessToken: String  // ✅ 토큰 다시 추가
+    ): Response<NicknameCheckResponse>
 
     @POST("/users/nicknames")
     suspend fun updateNickname(
