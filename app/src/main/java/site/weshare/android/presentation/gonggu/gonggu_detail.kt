@@ -60,7 +60,8 @@ data class GongguDetailResponse(
     val imageUrl: String? = null,
     val seller: SellerInfoResponse,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    val isClosed: Boolean = false
 )
 
 data class SellerInfoResponse(
@@ -85,7 +86,8 @@ data class GongguDetailItem(
     val description: String,
     val imageRes: Int? = null,
     val imageUrl: String? = null,
-    val seller: SellerInfo
+    val seller: SellerInfo,
+    val isClosed: Boolean = false
 )
 
 data class SellerInfo(
@@ -110,7 +112,8 @@ fun GongguDetailResponse.toUiModel(): GongguDetailItem {
         comments = this.comments,
         description = this.description,
         imageUrl = this.imageUrl,
-        seller = this.seller.toUiModel()
+        seller = this.seller.toUiModel(),
+        isClosed = this.isClosed
     )
 }
 
@@ -258,6 +261,21 @@ class GongguDetailRepository(
                 description = "햇반 공동구매합니다\n총 48개 구매해요\n\n간편하고 맛있는 즉석밥입니다.",
                 imageRes = R.drawable.gonggu_bab,
                 seller = SellerInfo(name = "최수정")
+            )
+            6 -> GongguDetailItem(
+                id = 6,
+                title = "제주삼다수 2L (마감)",
+                price = "25,920원",
+                totalQuantity = 24,
+                remainingQuantity = 0,
+                daysLeft = 0,
+                views = 120,
+                likes = 15,
+                comments = 25,
+                description = "삼다수 공동구매합니다\n2L 총 24개 구매해요",
+                imageRes = R.drawable.gonggu_samdasu,
+                seller = SellerInfo(name = "홍길동"),
+                isClosed = true
             )
             else -> GongguDetailItem(
                 id = itemId,
@@ -837,100 +855,169 @@ fun GongguDetailScreen(
                 Spacer(modifier = Modifier.height(100.dp))
             }
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shadowElevation = 8.dp,
-                color = Color.White
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 15.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            if (item.isClosed) {
+                // 마감된 경우 채팅창 만들기 버튼
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shadowElevation = 8.dp,
+                    color = Color.White
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    Button(
+                        onClick = { /* 채팅창 만들기 */ },
                         modifier = Modifier
-                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-                            .height(40.dp)
-                            .width(90.dp)
+                            .fillMaxWidth()
+//                            .height(56.dp)
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FB475)),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        IconButton(
-                            onClick = {
-                                if (selectedQuantity > 0) selectedQuantity--
-                            },
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        }
-
-                        Divider(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(1.dp),
-                            color = Color.LightGray
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "$selectedQuantity", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                        }
-
-                        Divider(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(1.dp),
-                            color = Color.LightGray
-                        )
-
-                        IconButton(
-                            onClick = {
-                                selectedQuantity++
-                            },
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(24.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        val priceText = item.price.replace(",", "").replace("원", "")
-                        val totalPrice = priceText.toIntOrNull() ?: 0
-                        val unitPrice = totalPrice / item.totalQuantity  // 개당 가격
-                        val myTotalPrice = selectedQuantity * unitPrice  // 내가 설정한 개수만큼의 총 가격
-
                         Text(
-                            text = "${String.format("%,d", myTotalPrice)}원",
+                            "공동구매 채팅창 만들기",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Blue
+                            color = Color.White
                         )
-                        Text(text = "무료배송", fontSize = 11.sp, color = Color.Black)
                     }
-                    Button(
-                        onClick = { onParticipateClick(selectedQuantity) },
-                        enabled = selectedQuantity <= item.remainingQuantity && item.remainingQuantity > 0,
+                }
+            } else {
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shadowElevation = 8.dp,
+                    color = Color.White
+                ) {
+                    Row(
                         modifier = Modifier
-                            .height(37.dp)
-                            .width(100.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(0.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("참여하기", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                                .height(40.dp)
+                                .width(90.dp)
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    if (selectedQuantity > 0) selectedQuantity--
+                                },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            }
+
+                            Divider(
+                                modifier = Modifier
+                                    .height(40.dp)
+                                    .width(1.dp),
+                                color = Color.LightGray
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "$selectedQuantity",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+
+                            Divider(
+                                modifier = Modifier
+                                    .height(40.dp)
+                                    .width(1.dp),
+                                color = Color.LightGray
+                            )
+
+                            IconButton(
+                                onClick = {
+                                    selectedQuantity++
+                                },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(24.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            val priceText = item.price.replace(",", "").replace("원", "")
+                            val totalPrice = priceText.toIntOrNull() ?: 0
+                            val unitPrice = totalPrice / item.totalQuantity  // 개당 가격
+                            val myTotalPrice = selectedQuantity * unitPrice  // 내가 설정한 개수만큼의 총 가격
+
+                            Text(
+                                text = "${String.format("%,d", myTotalPrice)}원",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Blue
+                            )
+                            Text(text = "무료배송", fontSize = 11.sp, color = Color.Black)
+                        }
+                        Button(
+                            onClick = { onParticipateClick(selectedQuantity) },
+                            enabled = selectedQuantity <= item.remainingQuantity && item.remainingQuantity > 0,
+                            modifier = Modifier
+                                .height(37.dp)
+                                .width(100.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FB475)),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                "참여하기",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
         }
 
+        // 마감 메시지 오버레이 부분을 다음과 같이 변경
+        if (item.isClosed) {
+            // 하단 버튼 영역을 제외한 부분에만 어두운 필터 적용
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)  // 하단 버튼 영역 제외하고 나머지 공간 차지
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "공동구매가\n마감되었어요",
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                        lineHeight = 45.sp,
+                        style = TextStyle(
+                            shadow = androidx.compose.ui.graphics.Shadow(
+                                color = Color.Black.copy(alpha = 0.7f),
+                                offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                                blurRadius = 4f
+                            )
+                        )
+                    )
+                }
+
+                // 하단 버튼 영역은 투명하게 유지
+                Spacer(modifier = Modifier.height(72.dp)) // 버튼 높이만큼 공간 확보
+            }
+        }
+
         // 수량 초과 메시지 다이얼로그
-        if (overLimit) {
+        if (overLimit && !item.isClosed) {
             Dialog(onDismissRequest = { selectedQuantity = item.remainingQuantity }) {
                 Card(
                     modifier = Modifier
@@ -970,7 +1057,7 @@ fun GongguDetailScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(44.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FB475)),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
@@ -1052,6 +1139,42 @@ fun GongguDetailScreenOverLimitPreview() {
         GongguDetailScreen(
             item = mockItem,
             initialQuantity = 15, // 남은 수량(8)보다 많은 값으로 설정하여 메시지 표시
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Closed Gonggu Preview")
+@Composable
+fun GongguDetailScreenClosedPreview() {
+    val mockClosedItem = GongguDetailItem(
+        id = 6,
+        title = "제주삼다수 2L",
+        price = "25,920원",
+        totalQuantity = 24,
+        remainingQuantity = 0,
+        daysLeft = 0,
+        views = 120,
+        likes = 15,
+        comments = 25,
+        description = "삼다수 공동구매합니다\n2L 총 24개 구매해요",
+        imageRes = R.drawable.gonggu_samdasu,
+        imageUrl = null,
+        seller = SellerInfo(
+            name = "홍길동",
+            profileImageRes = null,
+            totalLeaderCount = 8,
+            reviewCount = 37,
+            rating = 5.0f
+        ),
+        isClosed = true
+    )
+
+    MaterialTheme {
+        GongguDetailScreen(
+            item = mockClosedItem,
+            onReportClick = { },
+            onShareClick = { },
+            onInquiryClick = { }
         )
     }
 }
