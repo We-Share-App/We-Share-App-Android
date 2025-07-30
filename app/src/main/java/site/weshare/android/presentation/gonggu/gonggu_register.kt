@@ -783,7 +783,7 @@ fun InfoModal(
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(width = 290.dp, height = 165.dp)
+                .size(width = 290.dp, height = 180.dp)
                 .padding(24.dp)
                 .offset(x = 39.dp, y = 150.dp)
                 .wrapContentWidth()
@@ -822,7 +822,7 @@ fun InfoModal(
                 )
                 // 예시 문구
                 Text(
-                    text = "예) 총 구매 개수 $guestCount, 내가 가져가고 싶은 개수 $myGuestCount \n \t\t\t→ ${myGuestCount}개를 선택해주세요",
+                    text = "예) 총 구매 개수 100, 내가 가져가고 싶은 개수 10 \n \t\t\t→ 10개를 선택해주세요",
                     fontSize = 11.sp,
                     letterSpacing = (-0.8).sp,
                     lineHeight = 13.sp,
