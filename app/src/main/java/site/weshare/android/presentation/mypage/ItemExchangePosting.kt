@@ -210,7 +210,8 @@ fun PostingCard(item: PostingItem, onClick: () -> Unit) {
                     text = item.exchangeStatus,
                     fontSize = 12.sp,
                     color = WeShareGreen,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Medium
+
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
