@@ -6,6 +6,7 @@ import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import site.weshare.android.data.remote.api.UserApi
+import site.weshare.android.data.remote.api.UserLocationApi
 import java.nio.charset.StandardCharsets
 
 object ApiClient {
@@ -36,5 +37,8 @@ object ApiClient {
         .client(client)
         .build()
 
+
     val userApi: UserApi = retrofit.create(UserApi::class.java)
+
+    val userLocationApi: UserLocationApi = retrofit.create(UserLocationApi::class.java)
 }
