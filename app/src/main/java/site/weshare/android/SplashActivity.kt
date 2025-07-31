@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import site.weshare.android.presentation.location.LocationSettingScreen
 import site.weshare.android.presentation.sign.EmailInputScreen
 import site.weshare.android.presentation.sign.NicknameInputScreen
 import site.weshare.android.presentation.sign.VerificationCodeScreen
@@ -116,9 +117,32 @@ class SplashActivity : ComponentActivity() {
                             )
                         }
 
+//                        composable("nickname_input") {
+//                            NicknameInputScreen(
+//                                onNicknameSet = {
+//                                    sharedPreferences.edit().putBoolean("is_logged_in", true).apply()
+//                                    startActivity(Intent(this@SplashActivity, MainActivity::class.java).apply {
+//                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//                                    })
+//                                    finish()
+//                                }
+//                            )
+//                        }
+
                         composable("nickname_input") {
                             NicknameInputScreen(
                                 onNicknameSet = {
+                                    navController.navigate("location_setting") {
+                                        popUpTo("verification_code?email={email}") { inclusive = true } // 이전 인증 스택 제거 (선택)
+                                    }
+                                }
+                            )
+                        }
+
+                        composable("location_setting") {
+                            LocationSettingScreen(
+                                onLocationSet = {
+                                    // 위치 설정이 완료되면 MainActivity로 이동
                                     sharedPreferences.edit().putBoolean("is_logged_in", true).apply()
                                     startActivity(Intent(this@SplashActivity, MainActivity::class.java).apply {
                                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -127,6 +151,7 @@ class SplashActivity : ComponentActivity() {
                                 }
                             )
                         }
+
                     }
                 }
             }

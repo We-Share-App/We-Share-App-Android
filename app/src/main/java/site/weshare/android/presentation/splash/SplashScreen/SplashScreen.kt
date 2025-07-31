@@ -23,14 +23,21 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         delay(1000L) // 1초 대기
 
-        // 로그인 상태에 따라 분기
-        if (isLoggedIn) {
-            navToMain() // 로그인 되어 있으면 MainActivity로 이동
-        } else {
-            navToLogin() // 로그인 되어 있지 않으면 로그인 화면으로 이동
-        }
-    }
 
+        //테스트 용 (실제배포 시 비활성화)
+        navToLogin()
+
+        //실제 배포시 아래 코드를 활성화 위의 코드를 비활성화
+
+//        // 로그인 상태에 따라 분기
+//        if (isLoggedIn) {
+//            navToMain() // 로그인 되어 있으면 MainActivity로 이동
+//        } else {
+//            navToLogin() // 로그인 되어 있지 않으면 로그인 화면으로 이동
+//        }
+//    }
+
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()

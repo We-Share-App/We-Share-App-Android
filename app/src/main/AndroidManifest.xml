@@ -16,6 +16,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KachiAndroid"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.naver.maps.map.NCP_KEY_ID"
+            android:value="r9jvdt6n7n" />
+
+
         <activity
             android:name=".SplashActivity"
             android:exported="true" android:label="@string/title_activity_splash"
