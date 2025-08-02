@@ -42,6 +42,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import coil.compose.rememberAsyncImagePainter
+import site.weshare.android.util.getAccessToken
+import site.weshare.android.util.getSelectedRegions
+import site.weshare.android.model.ExchangePostDto
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+
 //import com.google.accompanist.pager.HorizontalPagerIndicator
 import kotlinx.coroutines.delay
 import site.weshare.android.R
@@ -55,7 +63,28 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
+
+fun ExchangePostDto.toExchangeProduct(): ExchangeProduct {
+    return ExchangeProduct(
+        id = this.id.toString(),
+        imageUrl = this.imageUrlList.firstOrNull() ?: "", // 첫 번째 이미지를 사용하거나 빈 문자열
+        name = this.itemName,
+        category = this.categoryName.joinToString(", "),
+        exchangeCondition = this.itemCondition
+    )
+}
+
+fun mapRegionToLocationId(regionName: String): Int? {
+    return when (regionName) {
+        "흑석동" -> 1
+        "이태원2동" -> 2
+        // TODO: 다른 지역에 대한 매핑 추가
+        else -> null
+    }
+}
 
 //import androidx.compose.ui.unit.toPx // toPx()를 사용하기 위해 필요
 
@@ -112,7 +141,7 @@ fun HomeScreen() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(210.dp) // 광고 이미지 비율에 맞게 높이 조절
-        ) { page ->
+        ) { page: Int ->
             Image(
                 painter = painterResource(id = adImages[page]),
                 contentDescription = "Advertisement",
@@ -131,7 +160,7 @@ fun HomeScreen() {
             println("공동구매 더보기 클릭") // 임시 확인용
         }
         Spacer(modifier = Modifier.height(16.dp))
-        HorizontalProductList(products = MockData.groupPurchaseProducts) { product ->
+        HorizontalProductList(products = MockData.groupPurchaseProducts) { product: GroupPurchaseProduct ->
             GroupPurchaseProductItem(product = product)
         }
 
@@ -144,7 +173,50 @@ fun HomeScreen() {
             println("물품교환 더보기 클릭") // 임시 확인용
         }
         Spacer(modifier = Modifier.height(16.dp))
-        HorizontalProductList(products = MockData.exchangeProducts) { product ->
+        val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
+        var exchangeProducts by remember { mutableStateOf<List<ExchangeProduct>>(emptyList()) }
+
+        LaunchedEffect(Unit) {
+            val selectedRegions = getSelectedRegions(context)
+            if (selectedRegions.isNotEmpty()) {
+                // TODO: 지역 이름을 locationId로 매핑하는 로직 필요. 현재는 임시로 1 사용.
+                val firstRegion = selectedRegions.first()
+                val locationId = mapRegionToLocationId(firstRegion) // 지역 이름을 locationId로 매핑
+
+                if (locationId != null) {
+                    val accessToken = getAccessToken(context)
+
+                    if (accessToken != null) {
+                        coroutineScope.launch {
+                            try {
+                                val response = ApiClient.exchangeApi.getExchangePosts(
+                                    accessToken = accessToken,
+                                    locationId = locationId,
+                                    lastPostId = null // 초기 로드 시 lastPostId는 null
+                                )
+                                if (response.isSuccessful) {
+                                    response.body()?.exchangePostDtoList?.let { dtoList ->
+                                        exchangeProducts = dtoList.map { it.toExchangeProduct() }
+                                    }
+                                } else {
+                                    // TODO: 에러 처리
+                                    println("물품 교환 목록 가져오기 실패: ${response.code()} - ${response.errorBody()?.string()}")
+                                }
+                            } catch (e: Exception) {
+                                // TODO: 네트워크 에러 처리
+                                println("물품 교환 목록 가져오기 중 예외 발생: ${e.message}")
+                            }
+                        }
+                    } else {
+                        println("Access Token이 없습니다. 로그인 필요.")
+                    }
+                } else {
+                    println("선택된 지역에 대한 locationId를 찾을 수 없습니다.")
+                }
+            }
+        }
+        HorizontalProductList(products = exchangeProducts) { product: ExchangeProduct ->
             ExchangeProductItem(product = product)
         }
     }
@@ -314,10 +386,9 @@ fun ExchangeProductItem(product: ExchangeProduct) {
         modifier = Modifier
             .width(100.dp) // 아이템의 너비는 HorizontalPager의 contentPadding과 함께 조정
     ) {
-        // 이미지는 리소스 ID를 사용하도록 변경
-        val imageResId = product.imageUrl.toIntOrNull() ?: R.drawable.ic_launcher_foreground // 기본 이미지
+        // 이미지는 URL을 사용하도록 변경 (Coil)
         Image(
-            painter = painterResource(id = imageResId),
+            painter = rememberAsyncImagePainter(product.imageUrl),
             contentDescription = product.name,
             modifier = Modifier
                 .size(95.dp)

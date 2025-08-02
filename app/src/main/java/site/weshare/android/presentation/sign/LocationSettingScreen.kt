@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import site.weshare.android.data.remote.model.UserLocationRequest
 import site.weshare.android.util.getAccessToken
+import site.weshare.android.util.saveSelectedRegions
 import java.util.*
 import jxl.Workbook
 
@@ -148,6 +149,7 @@ fun LocationSettingScreen(
                                 Log.e("LocationAPI", "⚠️ 올바르지 않은 지역 형식: $fullCity")
                             }
                         }
+                        saveSelectedRegions(appContext, selectedCities)
                         onLocationSet(selectedCities)
                     } else {
                         Toast.makeText(context, "지역을 선택해주세요", Toast.LENGTH_SHORT).show()
