@@ -21,8 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbUp // 좋아요 아이콘 (하트 아이콘은 다른 라이브러리 필요)
 import androidx.compose.material3.Card
@@ -33,6 +35,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,85 +77,117 @@ fun BarterScreen(){
 @OptIn(ExperimentalMaterial3Api::class) // TopAppBar 관련 API에 필요할 수 있음
 @Composable
 fun TopArea(){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface) // 배경색 설정 (카드의 배경색과 통일)
-            .padding(bottom = 8.dp) // 아래쪽에 여백 추가
-    ) {
-        // 1. 최상단: "흑석동" 및 아이콘들
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // 좌측: "흑석동" 텍스트와 드롭다운 아이콘
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .background(MaterialTheme.colorScheme.surface) // 배경색 설정 (카드의 배경색과 통일)
+//            .padding(bottom = 8.dp) // 아래쪽에 여백 추가
+//    ) {
+//        // 1. 최상단: "흑석동" 및 아이콘들
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 16.dp, vertical = 8.dp),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            // 좌측: "흑석동" 텍스트와 드롭다운 아이콘
+//            Row(
+//                modifier = Modifier.clickable { /* 위치 선택 드롭다운 토글 */ },
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                // Icon(Icons.Default.LocationOn, contentDescription = "Location") // 위치 아이콘 필요 시
+//                Text(
+//                    text = "흑석동",
+//                    style = MaterialTheme.typography.titleLarge,
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 20.sp, // 화면 이미지에 맞게 조절
+//                )
+//                Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Location")
+//                // TODO: 실제 드롭다운 메뉴 구현 (아래 FilterChip 예시 참고)
+//            }
+//
+//            // 우측: 검색, 하트, 메뉴 아이콘
+//            Row(
+//                horizontalArrangement = Arrangement.spacedBy(8.dp) // 아이콘 간 간격
+//            ) {
+//                IconButton(onClick = { /* 검색 클릭 */ }) {
+//                    Icon(Icons.Default.Search, contentDescription = "Search")
+//                }
+//                IconButton(onClick = { /* 관심 목록 클릭 */ }) {
+//                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorites")
+//                }
+//                IconButton(onClick = { /* 메뉴 클릭 */ }) {
+//                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+//                }
+//            }
+//        }
+//
+//        // 2. 필터/카테고리 칩 목록
+//        // LazyRow를 사용하여 스크롤 가능한 칩 목록 구현
+//        // 이미지에서는 칩들이 가로로 스크롤 되는 것처럼 보이므로 LazyRow가 적합
+//        LazyRow(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 16.dp),
+//            horizontalArrangement = Arrangement.spacedBy(8.dp), // 칩 간 간격
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            // 필터/카테고리 데이터 (예시)
+//            val filters = listOf("가격", "갯수", "카테고리", "상품상태")
+//            val sortOption = "최신순" // 정렬 옵션은 별도로 처리
+//
+//            // 일반 필터 칩들
+//            items(filters) { filterName ->
+//                FilterDropdownChip(label = filterName) {
+//                    // TODO: 필터 선택 시 동작 정의
+//                    // 예를 들어, 해당 필터에 대한 드롭다운 메뉴를 띄우는 로직
+//                }
+//            }
+//
+//            // 최신순 정렬 칩 (우측 정렬을 위해 Spacer와 함께 사용하거나,
+//            // LazyRow 자체의 contentPadding과 Item의 Modifier.weight()를 이용해 조절 가능)
+//            // 간단하게는 뒤쪽에 배치
+//            item {
+//                Spacer(modifier = Modifier.weight(1f)) // 남은 공간을 채워서 다음 칩을 오른쪽으로 밀어냄
+//                FilterDropdownChip(label = sortOption) {
+//                    // TODO: 정렬 옵션 선택 시 동작 정의
+//                }
+//            }
+//        }
+//    }
+//    val uiState by viewModel.uiState.collectAsState()
+    TopAppBar(
+        title = {
             Row(
-                modifier = Modifier.clickable { /* 위치 선택 드롭다운 토글 */ },
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable {
+//                    if (uiState.showLocationDialog) {
+//                        viewModel.hideLocationDialog()
+//                    } else {
+//                        viewModel.showLocationDialog()
+//                    }
+                }
             ) {
-                // Icon(Icons.Default.LocationOn, contentDescription = "Location") // 위치 아이콘 필요 시
-                Text(
-                    text = "흑석동",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp, // 화면 이미지에 맞게 조절
+//                Text(uiState.currentLocation, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Icon(
+                    Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .graphicsLayer {
+//                            rotationZ = if (uiState.showLocationDialog) 180f else 0f
+                        }
                 )
-                Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Location")
-                // TODO: 실제 드롭다운 메뉴 구현 (아래 FilterChip 예시 참고)
             }
-
-            // 우측: 검색, 하트, 메뉴 아이콘
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // 아이콘 간 간격
-            ) {
-                IconButton(onClick = { /* 검색 클릭 */ }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
-                }
-                IconButton(onClick = { /* 관심 목록 클릭 */ }) {
-                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorites")
-                }
-                IconButton(onClick = { /* 메뉴 클릭 */ }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menu")
-                }
-            }
-        }
-
-        // 2. 필터/카테고리 칩 목록
-        // LazyRow를 사용하여 스크롤 가능한 칩 목록 구현
-        // 이미지에서는 칩들이 가로로 스크롤 되는 것처럼 보이므로 LazyRow가 적합
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // 칩 간 간격
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 필터/카테고리 데이터 (예시)
-            val filters = listOf("가격", "갯수", "카테고리", "상품상태")
-            val sortOption = "최신순" // 정렬 옵션은 별도로 처리
-
-            // 일반 필터 칩들
-            items(filters) { filterName ->
-                FilterDropdownChip(label = filterName) {
-                    // TODO: 필터 선택 시 동작 정의
-                    // 예를 들어, 해당 필터에 대한 드롭다운 메뉴를 띄우는 로직
-                }
-            }
-
-            // 최신순 정렬 칩 (우측 정렬을 위해 Spacer와 함께 사용하거나,
-            // LazyRow 자체의 contentPadding과 Item의 Modifier.weight()를 이용해 조절 가능)
-            // 간단하게는 뒤쪽에 배치
-            item {
-                Spacer(modifier = Modifier.weight(1f)) // 남은 공간을 채워서 다음 칩을 오른쪽으로 밀어냄
-                FilterDropdownChip(label = sortOption) {
-                    // TODO: 정렬 옵션 선택 시 동작 정의
-                }
-            }
-        }
-    }
+        },
+        actions = {
+            IconButton(onClick = {}) { Icon(Icons.Default.Search, contentDescription = "검색") }
+            IconButton(onClick = {}) { Icon(Icons.Default.FavoriteBorder, contentDescription = "찜") }
+            IconButton(onClick = {}) { Icon(Icons.Default.Notifications, contentDescription = "알림") }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+    )
 }
 
 // 필터 드롭다운 칩을 위한 재사용 가능한 컴포저블
