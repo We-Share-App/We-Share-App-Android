@@ -51,7 +51,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation ("androidx.browser:browser:1.6.0")
-    implementation(libs.androidx.compose.material)  // 외부 브라우저 띄우기 위함
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.animation.core.lint)  // 외부 브라우저 띄우기 위함
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
