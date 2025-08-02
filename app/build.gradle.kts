@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "site.weshare.android"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -50,7 +50,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("androidx.navigation:navigation-compose:2.7.5")
-    implementation ("androidx.browser:browser:1.6.0")  // 외부 브라우저 띄우기 위함
+    implementation ("androidx.browser:browser:1.6.0")
+    implementation(libs.androidx.compose.material)  // 외부 브라우저 띄우기 위함
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

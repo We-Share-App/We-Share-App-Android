@@ -33,6 +33,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import site.weshare.android.presentation.barter.BarterPostRegister
 import site.weshare.android.presentation.barter.BarterScreen
 import site.weshare.android.presentation.chat.ChatScreen
 import site.weshare.android.presentation.gonggu.GongguMainScreen
@@ -130,7 +131,8 @@ fun AppMain(){
                 GongguMainScreen()
             }
             composable("tab3") {
-                BarterScreen()
+//                BarterScreen()
+                BarterPostRegister()
             }
             composable("tab4") {
                 ChatScreen()
