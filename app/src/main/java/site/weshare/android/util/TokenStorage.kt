@@ -19,3 +19,14 @@ fun getAccessToken(context: Context): String? {
         .getString("accessToken", null)
 }
 
+fun saveSelectedRegions(context: Context, regions: List<String>) {
+    context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        .edit() { putString("selectedRegions", regions.joinToString(",")) }
+}
+
+fun getSelectedRegions(context: Context): List<String> {
+    val regionsString = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        .getString("selectedRegions", null)
+    return regionsString?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
+}
+

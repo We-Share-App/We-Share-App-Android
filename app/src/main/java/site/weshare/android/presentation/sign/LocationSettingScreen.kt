@@ -1,4 +1,3 @@
-// ✅ 파일: LocationSettingScreen.kt (최종 정리본)
 package site.weshare.android.presentation.location
 
 import android.app.Activity
@@ -10,29 +9,25 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import site.weshare.android.R
 import site.weshare.android.data.remote.model.UserLocationRequest
 import site.weshare.android.util.getAccessToken
+import site.weshare.android.util.saveSelectedRegions
 import java.util.*
 import jxl.Workbook
 
@@ -40,7 +35,7 @@ private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 
 @Composable
 fun LocationSettingScreen(
-    onLocationSet: () -> Unit
+    onLocationSet: (List<String>) -> Unit
 ) {
     val context = LocalContext.current
     val appContext = context.applicationContext
@@ -50,8 +45,7 @@ fun LocationSettingScreen(
 
     var marker by remember { mutableStateOf<Marker?>(null) }
     var nearbyCities by remember { mutableStateOf<List<String>>(emptyList()) }
-    var selectedType by remember { mutableStateOf<String?>(null) } // "대표" or "보조"
-    var selectedCities by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var selectedCities by remember { mutableStateOf<List<String>>(emptyList()) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -92,92 +86,85 @@ fun LocationSettingScreen(
             mapView
         }, modifier = Modifier.weight(1f))
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            val main = selectedCities["대표"] ?: "대표 지역 선택"
-            val sub = selectedCities["보조"] ?: "보조 지역 선택"
-            listOf("대표" to main, "보조" to sub).forEach { (type, label) ->
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(4.dp)
-                        .background(Color(0xFFD7F5E9), RoundedCornerShape(12.dp))
-                        .clickable {
-                            selectedType = type
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                        Text(text = label, modifier = Modifier.padding(start = 8.dp))
-                        if (selectedCities.containsKey(type)) {
-                            IconButton(onClick = {
-                                selectedCities = selectedCities - type
-                            }) {
-                                Icon(painter = painterResource(id = R.drawable.ic_arrow_back), contentDescription = "삭제")
-                            }
-                        }
+        if (selectedCities.isNotEmpty()) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .wrapContentHeight(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                selectedCities.forEach { city ->
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFE0F2F1), RoundedCornerShape(20.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text(city)
                     }
                 }
             }
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
         AndroidView(factory = {
             android.widget.Button(it).apply {
                 text = "지역 설정 완료"
                 setOnClickListener {
-                    val token = getAccessToken(appContext)
-                    if (token == null) {
-                        Toast.makeText(context, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
-                        return@setOnClickListener
-                    }
+                    if (selectedCities.isNotEmpty()) {
+                        Log.d("LocationAPI", "🧭 선택된 지역: $selectedCities")
+                        selectedCities.forEach { fullCity ->
+                            val parts = fullCity.split(" ")
+                            if (parts.size >= 2) {
+                                val request = UserLocationRequest(
+                                    stateName = extractState(parts[0]),
+                                    cityName = parts[0],
+                                    townName = parts[1]
+                                )
 
-                    selectedCities.forEach { (role, fullCity) ->
-                        val parts = fullCity.split(" ")
-                        if (parts.size >= 2) {
-                            val request = UserLocationRequest(
-                                stateName = extractState(parts[0]),
-                                cityName = parts[0],
-                                townName = parts[1]
-                            )
-                            CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    Log.d("LocationAPI", "📤 $role 지역 요청 전송: $request")
-                                    val response = ApiClient.userLocationApi.registerUserLocation(token, request)
-                                    if (response.isSuccessful && response.body()?.isSuccess == true) {
-                                        val locationId = response.body()?.locationId
-                                        val userLocationId = response.body()?.userLocationId
-                                        Log.d("LocationAPI", "✅ 등록 성공 ($role): locationId=$locationId, userLocationId=$userLocationId")
-                                        if (role == "대표") {
-                                            saveRepresentativeLocation(context, fullCity)
-                                        } else {
-                                            saveSecondaryLocation(context, fullCity)
-                                        }
-                                    } else {
-                                        Log.e("LocationAPI", "❌ 응답 실패 ($role): ${response.code()} ${response.message()} ${response.errorBody()?.string()}")
+                                Log.d("LocationAPI", "📦 전송할 Request: $request")
+
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val token = getAccessToken(appContext)
+                                    Log.d("LocationAPI", "📥 가져온 토큰: $token")
+                                    if (token == null) {
+                                        Log.e("LocationAPI", "❌ AccessToken 없음")
+                                        return@launch
                                     }
-                                } catch (e: Exception) {
-                                    Log.e("LocationAPI", "❗ 예외 발생 ($role): ${e.message}", e)
+
+                                    val client = ApiClient.userLocationApi
+                                    try {
+                                        val response = client.registerUserLocation(token, request)
+                                        if (response.isSuccessful && response.body()?.isSuccess == true) {
+                                            Log.d("LocationAPI", "✅ 전송 성공: ${response.body()}")
+                                        } else {
+                                            Log.e("LocationAPI", "❌ 실패: ${response.code()} - ${response.errorBody()?.string()}")
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("LocationAPI", "❗ 네트워크 예외 발생: ${e.message}")
+                                    }
                                 }
+                            } else {
+                                Log.e("LocationAPI", "⚠️ 올바르지 않은 지역 형식: $fullCity")
                             }
                         }
+                        saveSelectedRegions(appContext, selectedCities)
+                        onLocationSet(selectedCities)
+                    } else {
+                        Toast.makeText(context, "지역을 선택해주세요", Toast.LENGTH_SHORT).show()
+                        Log.w("LocationAPI", "❗ 지역 미선택 상태에서 버튼 클릭됨")
                     }
-                    onLocationSet()
                 }
             }
         }, modifier = Modifier.fillMaxWidth().padding(16.dp))
 
-        if (showBottomSheet && selectedType != null) {
+        if (showBottomSheet) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 300.dp)
                     .background(Color.White)
                     .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
             ) {
                 Column {
                     nearbyCities.forEach { city ->
@@ -187,8 +174,14 @@ fun LocationSettingScreen(
                                 .fillMaxWidth()
                                 .padding(vertical = 12.dp)
                                 .clickable {
-                                    selectedCities = selectedCities + (selectedType!! to city)
-                                    showBottomSheet = false
+                                    if (!selectedCities.contains(city)) {
+                                        if (selectedCities.size < 2) {
+                                            selectedCities = selectedCities + city
+                                            showBottomSheet = false
+                                        } else {
+                                            Toast.makeText(context, "최대 2개까지 선택 가능합니다", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
                                 }
                         )
                     }
@@ -196,26 +189,6 @@ fun LocationSettingScreen(
             }
         }
     }
-}
-
-fun saveRepresentativeLocation(context: Context, location: String) {
-    context.getSharedPreferences("user_pref", Context.MODE_PRIVATE)
-        .edit().putString("main_location", location).apply()
-}
-
-fun saveSecondaryLocation(context: Context, location: String) {
-    context.getSharedPreferences("user_pref", Context.MODE_PRIVATE)
-        .edit().putString("sub_location", location).apply()
-}
-
-fun getRepresentativeLocation(context: Context): String? {
-    return context.getSharedPreferences("user_pref", Context.MODE_PRIVATE)
-        .getString("main_location", null)
-}
-
-fun getSecondaryLocation(context: Context): String? {
-    return context.getSharedPreferences("user_pref", Context.MODE_PRIVATE)
-        .getString("sub_location", null)
 }
 
 private fun readNearbyCities(
@@ -228,6 +201,7 @@ private fun readNearbyCities(
     val result = mutableListOf<String>()
     val file = context.assets.open("coordinate.xls")
     val workbook = Workbook.getWorkbook(file)
+
     val sheet = when (adminArea) {
         "서울특별시" -> workbook.getSheet(0)
         "강원도" -> workbook.getSheet(1)
@@ -263,6 +237,7 @@ private fun readNearbyCities(
             }
         }
     }
+
     return result
 }
 
@@ -304,14 +279,12 @@ private fun extractState(cityName: String): String {
 
 
 
-
 //package site.weshare.android.presentation.location
 //
 //import android.app.Activity
 //import android.content.Context
 //import android.location.Geocoder
 //import android.location.Location
-//import android.util.Log
 //import android.widget.Toast
 //import androidx.compose.foundation.background
 //import androidx.compose.foundation.clickable
@@ -329,13 +302,9 @@ private fun extractState(cityName: String): String {
 //import com.naver.maps.map.*
 //import com.naver.maps.map.overlay.Marker
 //import com.naver.maps.map.util.FusedLocationSource
-//import kotlinx.coroutines.CoroutineScope
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.launch
-//import site.weshare.android.data.remote.model.UserLocationRequest
-//import site.weshare.android.util.getAccessToken
-//import java.util.*
 //import jxl.Workbook
+//import kotlinx.coroutines.launch
+//import java.util.*
 //
 //private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 //
@@ -344,7 +313,6 @@ private fun extractState(cityName: String): String {
 //    onLocationSet: (List<String>) -> Unit
 //) {
 //    val context = LocalContext.current
-//    val appContext = context.applicationContext
 //    val mapView = remember { MapView(context) }
 //    val fusedLocationSource = remember { FusedLocationSource(context as Activity, LOCATION_PERMISSION_REQUEST_CODE) }
 //    val coroutineScope = rememberCoroutineScope()
@@ -376,7 +344,6 @@ private fun extractState(cityName: String): String {
 //
 //                        if (admin != null && local != null) {
 //                            val results = readNearbyCities(context, admin, local, coord.latitude, coord.longitude)
-//                            Log.d("LocationAPI", "📍 선택 위치: $admin $local, 결과: $results")
 //                            if (results.isNotEmpty()) {
 //                                nearbyCities = results
 //                                showBottomSheet = true
@@ -419,46 +386,9 @@ private fun extractState(cityName: String): String {
 //                text = "지역 설정 완료"
 //                setOnClickListener {
 //                    if (selectedCities.isNotEmpty()) {
-//                        Log.d("LocationAPI", "🧭 선택된 지역: $selectedCities")
-//                        selectedCities.forEach { fullCity ->
-//                            val parts = fullCity.split(" ")
-//                            if (parts.size >= 2) {
-//                                val request = UserLocationRequest(
-//                                    stateName = extractState(parts[0]),
-//                                    cityName = parts[0],
-//                                    townName = parts[1]
-//                                )
-//
-//                                Log.d("LocationAPI", "📦 전송할 Request: $request")
-//
-//                                CoroutineScope(Dispatchers.IO).launch {
-//                                    val token = getAccessToken(appContext)
-//                                    Log.d("LocationAPI", "📥 가져온 토큰: $token")
-//                                    if (token == null) {
-//                                        Log.e("LocationAPI", "❌ AccessToken 없음")
-//                                        return@launch
-//                                    }
-//
-//                                    val client = ApiClient.userLocationApi
-//                                    try {
-//                                        val response = client.registerUserLocation(token, request)
-//                                        if (response.isSuccessful && response.body()?.isSuccess == true) {
-//                                            Log.d("LocationAPI", "✅ 전송 성공: ${response.body()}")
-//                                        } else {
-//                                            Log.e("LocationAPI", "❌ 실패: ${response.code()} - ${response.errorBody()?.string()}")
-//                                        }
-//                                    } catch (e: Exception) {
-//                                        Log.e("LocationAPI", "❗ 네트워크 예외 발생: ${e.message}")
-//                                    }
-//                                }
-//                            } else {
-//                                Log.e("LocationAPI", "⚠️ 올바르지 않은 지역 형식: $fullCity")
-//                            }
-//                        }
 //                        onLocationSet(selectedCities)
 //                    } else {
 //                        Toast.makeText(context, "지역을 선택해주세요", Toast.LENGTH_SHORT).show()
-//                        Log.w("LocationAPI", "❗ 지역 미선택 상태에서 버튼 클릭됨")
 //                    }
 //                }
 //            }
@@ -558,25 +488,3 @@ private fun extractState(cityName: String): String {
 //    return locA.distanceTo(locB).toDouble()
 //}
 //
-//private fun extractState(cityName: String): String {
-//    return when {
-//        cityName.contains("서울") -> "서울특별시"
-//        cityName.contains("경기") -> "경기도"
-//        cityName.contains("부산") -> "부산광역시"
-//        cityName.contains("인천") -> "인천광역시"
-//        cityName.contains("대구") -> "대구광역시"
-//        cityName.contains("광주") -> "광주광역시"
-//        cityName.contains("대전") -> "대전광역시"
-//        cityName.contains("울산") -> "울산광역시"
-//        cityName.contains("세종") -> "세종특별자치시"
-//        cityName.contains("강원") -> "강원도"
-//        cityName.contains("충북") -> "충청북도"
-//        cityName.contains("충남") -> "충청남도"
-//        cityName.contains("전북") -> "전라북도"
-//        cityName.contains("전남") -> "전라남도"
-//        cityName.contains("경북") -> "경상북도"
-//        cityName.contains("경남") -> "경상남도"
-//        cityName.contains("제주") -> "제주특별자치도"
-//        else -> cityName
-//    }
-//}
