@@ -1,11 +1,13 @@
 package site.weshare.android.presentation.sign.login
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +25,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xffF0F0F0))
             .padding(horizontal = 24.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -133,3 +136,11 @@ fun LoginScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun LoginScreenPreview() {
+    LoginScreen(
+        navToWebLogin = {},
+        onLoginSuccess = {}
+    )
+}

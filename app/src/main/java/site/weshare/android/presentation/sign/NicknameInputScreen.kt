@@ -1,13 +1,18 @@
 package site.weshare.android.presentation.sign
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import site.weshare.android.util.getAccessToken
 import java.net.URLEncoder
@@ -28,12 +33,15 @@ fun NicknameInputScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .background(Color(0xffF0F0F0))
+            .padding(28.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("STEP 1", style = MaterialTheme.typography.titleMedium)
+        Text("STEP 1", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
         Spacer(modifier = Modifier.height(8.dp))
-        Text("닉네임을 입력해주세요.\n상품 등록 및 구매, 교환을 위해 필요합니다.")
+        Text("닉네임을 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(2.dp))
+        Text("상품 등록 및 구매, 교환을 위해 필요합니다.", fontSize = 13.sp, fontWeight = FontWeight.Light, color = Color.Gray)
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
@@ -307,3 +315,11 @@ fun NicknameInputScreen(
 //        }
 //    }
 //}
+
+@Preview(showBackground = true)
+@Composable
+private fun NicknameInputScreenPreview() {
+    NicknameInputScreen(
+        onNicknameSet = {}
+    )
+}
