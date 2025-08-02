@@ -124,8 +124,6 @@ fun SellerInfoResponse.toUiModel(): SellerInfo {
 // ==================== API Service & Repository ====================
 interface GongguDetailApiService {
     suspend fun getGongguDetail(itemId: Int): GongguDetailResponse
-    suspend fun participateInGonggu(itemId: Int, quantity: Int): Boolean
-    suspend fun toggleLike(itemId: Int): Boolean
     suspend fun incrementView(itemId: Int): Boolean
 }
 
@@ -139,32 +137,6 @@ class GongguDetailRepository(
                 Result.success(response.toUiModel())
             } else {
                 Result.success(getMockDetailData(itemId))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun participateInGonggu(itemId: Int, quantity: Int): Result<Boolean> {
-        return try {
-            if (apiService != null) {
-                val result = apiService.participateInGonggu(itemId, quantity)
-                Result.success(result)
-            } else {
-                Result.success(true)
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun toggleLike(itemId: Int): Result<Boolean> {
-        return try {
-            if (apiService != null) {
-                val result = apiService.toggleLike(itemId)
-                Result.success(result)
-            } else {
-                Result.success(true)
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -329,58 +301,6 @@ class GongguDetailViewModel(
         }
     }
 
-    fun toggleLike() {
-        val currentItem = _uiState.value.item ?: return
-
-        viewModelScope.launch {
-            val result = repository.toggleLike(currentItem.id)
-            result.fold(
-                onSuccess = {
-                    val currentLiked = _uiState.value.isLiked
-                    val updatedItem = currentItem.copy(
-                        likes = if (currentLiked) currentItem.likes - 1 else currentItem.likes + 1
-                    )
-                    _uiState.value = _uiState.value.copy(
-                        item = updatedItem,
-                        isLiked = !currentLiked
-                    )
-                },
-                onFailure = { exception ->
-                    _uiState.value = _uiState.value.copy(
-                        error = exception.message ?: "좋아요 실패"
-                    )
-                }
-            )
-        }
-    }
-
-    fun participateInGonggu(quantity: Int) {
-        val currentItem = _uiState.value.item ?: return
-
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-
-            val result = repository.participateInGonggu(currentItem.id, quantity)
-            result.fold(
-                onSuccess = {
-                    val updatedItem = currentItem.copy(
-                        remainingQuantity = currentItem.remainingQuantity - quantity
-                    )
-                    _uiState.value = _uiState.value.copy(
-                        item = updatedItem,
-                        participateResult = "공동구매 참여가 완료되었습니다!",
-                        isLoading = false
-                    )
-                },
-                onFailure = { exception ->
-                    _uiState.value = _uiState.value.copy(
-                        error = exception.message ?: "참여 실패",
-                        isLoading = false
-                    )
-                }
-            )
-        }
-    }
 
     fun clearParticipateResult() {
         _uiState.value = _uiState.value.copy(participateResult = null)
@@ -416,15 +336,6 @@ fun GongguDetailScreenContainer(
             ) {
                 CircularProgressIndicator()
             }
-        }
-        uiState.item != null -> {
-            GongguDetailScreen(
-                item = uiState.item!!,
-                onBackClick = onBackClick,
-                onHeartClick = { viewModel.toggleLike() },
-                onParticipateClick = { quantity -> viewModel.participateInGonggu(quantity) },
-                isLiked = uiState.isLiked
-            )
         }
     }
 }

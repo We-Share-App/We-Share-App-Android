@@ -20,7 +20,10 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import site.weshare.android.data.remote.api.model.EmailRequest
 import site.weshare.android.util.getAccessToken
 
@@ -40,8 +43,10 @@ fun EmailInputScreen(
         Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("STEP 2", style = MaterialTheme.typography.titleMedium)
-        Text("이메일을 입력해주세요.")
+        Text("STEP 2", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("이메일을 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = email,
@@ -87,4 +92,13 @@ fun EmailInputScreen(
             Text(if (isLoading) "전송 중..." else "확인")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EmailInputScreenPreview() {
+    EmailInputScreen(
+        onNext = {},
+        onBack = {}
+    )
 }
