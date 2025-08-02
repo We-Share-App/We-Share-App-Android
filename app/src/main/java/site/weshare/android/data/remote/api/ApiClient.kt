@@ -10,7 +10,9 @@ import site.weshare.android.data.remote.api.UserLocationApi
 import java.nio.charset.StandardCharsets
 
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+//    로컬 실행 시
+//    private const val BASE_URL = "http://10.0.2.2:8080/"
+private const val BASE_URL = "https://we-share.site/"
 
     // ✅ JSON 인코딩을 위한 Gson 설정
     private val gson: Gson = GsonBuilder()
