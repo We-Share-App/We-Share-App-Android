@@ -1,4 +1,4 @@
-// ✅ 파일: LocationSettingScreen.kt
+// ✅ 파일: LocationSettingScreen.kt (최종 정리본)
 package site.weshare.android.presentation.location
 
 import android.app.Activity
@@ -76,6 +76,7 @@ fun LocationSettingScreen(
 
                         if (admin != null && local != null) {
                             val results = readNearbyCities(context, admin, local, coord.latitude, coord.longitude)
+                            Log.d("LocationAPI", "📍 선택 위치: $admin $local, 결과: $results")
                             if (results.isNotEmpty()) {
                                 nearbyCities = results
                                 showBottomSheet = true
@@ -91,12 +92,10 @@ fun LocationSettingScreen(
             mapView
         }, modifier = Modifier.weight(1f))
 
-        // ✅ 선택된 지역 표시 (삭제 기능 포함)
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .wrapContentHeight(),
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             val main = selectedCities["대표"] ?: "대표 지역 선택"
@@ -126,7 +125,6 @@ fun LocationSettingScreen(
             }
         }
 
-        // ✅ 설정 완료 버튼
         AndroidView(factory = {
             android.widget.Button(it).apply {
                 text = "지역 설정 완료"
@@ -146,16 +144,23 @@ fun LocationSettingScreen(
                                 townName = parts[1]
                             )
                             CoroutineScope(Dispatchers.IO).launch {
-                                val client = ApiClient.userLocationApi
                                 try {
-                                    val response = client.registerUserLocation(token, request)
+                                    Log.d("LocationAPI", "📤 $role 지역 요청 전송: $request")
+                                    val response = ApiClient.userLocationApi.registerUserLocation(token, request)
                                     if (response.isSuccessful && response.body()?.isSuccess == true) {
+                                        val locationId = response.body()?.locationId
+                                        val userLocationId = response.body()?.userLocationId
+                                        Log.d("LocationAPI", "✅ 등록 성공 ($role): locationId=$locationId, userLocationId=$userLocationId")
                                         if (role == "대표") {
                                             saveRepresentativeLocation(context, fullCity)
+                                        } else {
+                                            saveSecondaryLocation(context, fullCity)
                                         }
+                                    } else {
+                                        Log.e("LocationAPI", "❌ 응답 실패 ($role): ${response.code()} ${response.message()} ${response.errorBody()?.string()}")
                                     }
                                 } catch (e: Exception) {
-                                    Log.e("LocationAPI", "❗ 네트워크 예외 발생: ${e.message}")
+                                    Log.e("LocationAPI", "❗ 예외 발생 ($role): ${e.message}", e)
                                 }
                             }
                         }
@@ -165,7 +170,6 @@ fun LocationSettingScreen(
             }
         }, modifier = Modifier.fillMaxWidth().padding(16.dp))
 
-        // ✅ 바텀시트
         if (showBottomSheet && selectedType != null) {
             Box(
                 modifier = Modifier
@@ -199,9 +203,19 @@ fun saveRepresentativeLocation(context: Context, location: String) {
         .edit().putString("main_location", location).apply()
 }
 
+fun saveSecondaryLocation(context: Context, location: String) {
+    context.getSharedPreferences("user_pref", Context.MODE_PRIVATE)
+        .edit().putString("sub_location", location).apply()
+}
+
 fun getRepresentativeLocation(context: Context): String? {
     return context.getSharedPreferences("user_pref", Context.MODE_PRIVATE)
         .getString("main_location", null)
+}
+
+fun getSecondaryLocation(context: Context): String? {
+    return context.getSharedPreferences("user_pref", Context.MODE_PRIVATE)
+        .getString("sub_location", null)
 }
 
 private fun readNearbyCities(
