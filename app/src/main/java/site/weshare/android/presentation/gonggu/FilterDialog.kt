@@ -22,15 +22,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import site.weshare.android.presentation.gonggu.FilterSettings
 
-// ==================== 필터 설정 데이터 모델 ====================
-data class FilterSettings(
-    val minPrice: String = "",
-    val maxPrice: String = "",
-    val minCount: String = "",
-    val maxCount: String = "",
-    val selectedCategory: String = ""
-)
+//// ==================== 필터 설정 데이터 모델 ====================
+//data class FilterSettings(
+//    val minPrice: String = "",
+//    val maxPrice: String = "",
+//    val minCount: String = "",
+//    val maxCount: String = "",
+//    val selectedCategory: String = ""
+//)
 
 // ==================== 필터 다이얼로그 ====================
 @Composable
