@@ -30,7 +30,7 @@ import site.weshare.android.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarterPostRegister() {
+fun BarterCandidateRegister() {
     var description by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -128,25 +128,7 @@ fun BarterPostRegister() {
                 }
             )
 
-            // 교환 희망 카테고리
-            Title("교환 희망 카테고리")
-            var selectedCategories by remember { mutableStateOf(listOf<String>()) }
-            val categories = listOf(
-                "의류", "신발", "디지털기기", "뷰티/미용", "가구",
-                "생활가전", "게임", "도서/티켓/음반", "피규어/인형", "스포츠"
-            )
-            CategorySelectionGroup(
-                options = categories,
-                selectedOptions = selectedCategories,
-                onOptionSelected = { category ->
-                    selectedCategories = if (selectedCategories.contains(category)) {
-                        selectedCategories - category
-                    } else {
-                        selectedCategories + category
-                    }
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+
 
             // 상품 상태
             Title("상품 상태")
@@ -160,6 +142,10 @@ fun BarterPostRegister() {
                     selectedProductState = if (selectedProductState == state) null else state
                 }
             )
+
+            // 희망 공개 시간
+            Title("희망 공개 시간")
+            DesiredRevealTime()
 
             // 설명 섹션
             Title("설명")
@@ -210,9 +196,9 @@ fun BarterPostRegister() {
                 }
             )
 
-            // 희망 공개 시간
+            //희망 공개 시간
             Title("희망 공개 시간")
-            DesiredRevealTime()
+
 
             // 등록 버튼
             Button(
@@ -465,6 +451,6 @@ fun Title(text: String) {
 @Composable
 fun RegisterDetailScreenPreview() {
     MaterialTheme {
-        BarterPostRegister()
+        BarterCandidateRegister()
     }
 }
