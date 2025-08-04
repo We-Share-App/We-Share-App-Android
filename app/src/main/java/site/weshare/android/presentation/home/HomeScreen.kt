@@ -180,31 +180,27 @@ fun HomeScreen() {
         LaunchedEffect(Unit) {
             val selectedRegions = getSelectedRegions(context)
             if (selectedRegions.isNotEmpty()) {
-                // TODO: 지역 이름을 locationId로 매핑하는 로직 필요. 현재는 임시로 1 사용.
                 val firstRegion = selectedRegions.first()
-                val locationId = mapRegionToLocationId(firstRegion) // 지역 이름을 locationId로 매핑
+                val locationId = mapRegionToLocationId(firstRegion)
 
                 if (locationId != null) {
                     val accessToken = getAccessToken(context)
-
                     if (accessToken != null) {
                         coroutineScope.launch {
                             try {
                                 val response = ApiClient.exchangeApi.getExchangePosts(
                                     accessToken = accessToken,
                                     locationId = locationId,
-                                    lastPostId = null // 초기 로드 시 lastPostId는 null
+                                    lastPostId = null
                                 )
                                 if (response.isSuccessful) {
                                     response.body()?.exchangePostDtoList?.let { dtoList ->
                                         exchangeProducts = dtoList.map { it.toExchangeProduct() }
                                     }
                                 } else {
-                                    // TODO: 에러 처리
                                     println("물품 교환 목록 가져오기 실패: ${response.code()} - ${response.errorBody()?.string()}")
                                 }
                             } catch (e: Exception) {
-                                // TODO: 네트워크 에러 처리
                                 println("물품 교환 목록 가져오기 중 예외 발생: ${e.message}")
                             }
                         }
