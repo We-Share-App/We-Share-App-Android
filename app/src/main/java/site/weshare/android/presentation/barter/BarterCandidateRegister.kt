@@ -1,14 +1,11 @@
 package site.weshare.android.presentation.barter
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,17 +13,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import site.weshare.android.R
+import site.weshare.android.util.BarterScreen.CategorySelectionGroup
+import site.weshare.android.util.BarterScreen.InputField
+import site.weshare.android.util.BarterScreen.Title
 
 
 @Composable
@@ -116,8 +114,8 @@ fun BarterCandidateRegister() {
             Title("물품 카테고리")
             var selectedItemCategory by remember { mutableStateOf<String?>(null) } // 단일 선택을 위해 String? 타입 사용
             val itemCategories = listOf(
-                "가전", "의류", "도서", "식품", "생활용품", "스포츠/레저",
-                "유아용품", "반려동물용품", "기타"
+                "의류", "신발", "디지털기기","뷰티/미용", "가구",
+                "생활가전","게임", "도서/티켓/음반", "피규어/인형", "스포츠" ,
             )
             CategorySelectionGroup(
                 options = itemCategories,
