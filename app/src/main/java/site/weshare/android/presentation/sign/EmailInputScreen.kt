@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,10 +42,9 @@ fun EmailInputScreen(
     val scope = rememberCoroutineScope()
 
     Column(
-        Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center
+        Modifier.fillMaxSize().padding(start = 28.dp, end = 28.dp, top = 200.dp)
     ) {
-        Text("STEP 2", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
+        Text("STEP 4", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
         Spacer(modifier = Modifier.height(8.dp))
         Text("이메일을 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(24.dp))
@@ -86,10 +87,21 @@ fun EmailInputScreen(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2FB475),
+                contentColor = Color.White,
+                disabledContainerColor = Color(0xFF787878),
+                disabledContentColor = Color.LightGray
+            ),
+            shape = RoundedCornerShape(5.dp),
             enabled = email.isNotBlank() && !isLoading
         ) {
-            Text(if (isLoading) "전송 중..." else "확인")
+            Text(
+                text = if (isLoading) "확인 중…" else "확    인",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }

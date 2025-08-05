@@ -3,6 +3,7 @@ package site.weshare.android.presentation.sign
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,9 +35,8 @@ fun NicknameInputScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xffF0F0F0))
-            .padding(28.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
+            .padding(start = 28.dp, end = 28.dp, top = 200.dp),
+        ) {
         Text("STEP 1", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
         Spacer(modifier = Modifier.height(8.dp))
         Text("닉네임을 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
@@ -152,10 +152,21 @@ fun NicknameInputScreen(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2FB475),
+                contentColor = Color.White,
+                disabledContainerColor = Color(0xFF787878),
+                disabledContentColor = Color.LightGray
+            ),
+            shape = RoundedCornerShape(5.dp),
             enabled = isChecked && isAvailable && !isSubmitting
         ) {
-            Text(if (isSubmitting) "확인 중..." else "확 인")
+            Text(
+                text = if (isSubmitting) "확인 중…" else "확    인",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
