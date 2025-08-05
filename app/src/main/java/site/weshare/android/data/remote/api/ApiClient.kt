@@ -7,6 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import site.weshare.android.data.remote.api.UserApi
 import site.weshare.android.data.remote.api.UserLocationApi
+import site.weshare.android.data.remote.api.ExchangeApi
 import java.nio.charset.StandardCharsets
 
 object ApiClient {
@@ -43,4 +44,5 @@ private const val BASE_URL = "https://we-share.site/"
     val userApi: UserApi = retrofit.create(UserApi::class.java)
 
     val userLocationApi: UserLocationApi = retrofit.create(UserLocationApi::class.java)
+    val exchangeApi: ExchangeApi = retrofit.create(ExchangeApi::class.java)
 }

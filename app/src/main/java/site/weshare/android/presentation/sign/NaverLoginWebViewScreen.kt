@@ -100,6 +100,7 @@ fun NaverLoginWebViewScreen(
 
                         Log.d("LoginTokens", "access=$access, refresh=$refresh")
 
+                        // ✅ ✅ ✅ 여기서 토큰 저장 추가
                         if (access != null && refresh != null) {
                             saveAccessToken(context, access)
                             saveRefreshToken(context, refresh)
@@ -108,6 +109,7 @@ fun NaverLoginWebViewScreen(
                             Log.e("LoginError", "❌ 토큰 추출 실패")
                         }
 
+                        // ✅ 다음 화면으로 이동
                         onLoginSuccess()
                     }
                 }
