@@ -87,7 +87,7 @@ fun NaverLoginWebViewScreen(
                         val cookieManager = CookieManager.getInstance()
 
                         // ✅ 도메인 기준으로 쿠키 가져오기
-                        val rawCookies = cookieManager.getCookie("https://we-share.site").orEmpty()
+                        val rawCookies = cookieManager.getCookie("https://we-share.site/").orEmpty()
                         Log.d("LoginCookies", "🍪 쿠키: $rawCookies")
 
                         val tokenMap = rawCookies.split(";").mapNotNull {
