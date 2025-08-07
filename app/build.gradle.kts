@@ -61,12 +61,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Retrofit, OkHttp, Gson
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
-    implementation("io.coil-kt:coil-compose:2.6.0")
 
 
     //네이버 지도 api
@@ -76,4 +70,24 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0") // JSON 파싱을 위해 Gson 컨버터 사용
+
+    // OkHttp (Retrofit의 내부 HTTP 클라이언트)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0") // API 요청/응답 로깅 (디버깅용)
+
+    // Gson (JSON 직렬화/역직렬화)
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Jetpack Compose ViewModel 
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0-beta01") // 또는 최신 버전
+
+    // Coil (이미지 로딩 라이브러리)
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 }

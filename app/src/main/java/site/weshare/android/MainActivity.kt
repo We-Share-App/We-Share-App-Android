@@ -134,9 +134,9 @@ fun AppMain(){
             }
             composable("tab3") {
 //                BarterScreen()
-//                BarterPostRegister()
+                BarterPostRegister()
 //                BarterDetailScreen(productId = "sample_product_id")
-                ExchangeProposalScreen()
+//                ExchangeProposalScreen()
 
             }
             composable("tab4") {
