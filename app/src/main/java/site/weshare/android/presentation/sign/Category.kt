@@ -1,21 +1,17 @@
 package site.weshare.android.presentation.sign
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -24,28 +20,29 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
+import site.weshare.android.R
 
 data class Category(
     val id: String,
     val name: String,
-    val icon: ImageVector,
-    val backgroundColor: Color
+    val iconResId: Int
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategorySelectionScreen() {
     val categories = listOf(
-        Category("clothes", "의류", Icons.Default.Person, Color(0xFFE91E63)),
-        Category("shoes", "신발", Icons.Default.Person, Color(0xFF2196F3)),
-        Category("digital", "디지털기기", Icons.Default.Person, Color(0xFF00BCD4)),
-        Category("furniture", "가구", Icons.Default.Person, Color(0xFF3F51B5)),
-        Category("appliances", "생활가전", Icons.Default.Person, Color(0xFF9C27B0)),
-        Category("games", "게임", Icons.Default.Person, Color(0xFF424242)),
-        Category("toys", "장난감/인형", Icons.Default.Person, Color(0xFFFF9800)),
-        Category("sports", "스포츠", Icons.Default.Person, Color(0xFF4CAF50)),
-        Category("books", "도서/티켓/음반", Icons.Default.Person, Color(0xFFFFC107)),
-        Category("beauty", "뷰티/미용", Icons.Default.Person, Color(0xFFE91E63))
+        Category("clothes", "의류", R.drawable.clothed), // 실제 drawable 이름으로 변경
+        Category("shoes", "신발", R.drawable.shoes),
+        Category("digital", "디지털기기", R.drawable.digital),
+        Category("furniture", "가구", R.drawable.furniture),
+        Category("appliances", "생활가전", R.drawable.appliances),
+        Category("games", "게임", R.drawable.game),
+        Category("toys", "장난감/인형", R.drawable.doll),
+        Category("sports", "스포츠", R.drawable.sports),
+        Category("books", "도서/티켓/음반", R.drawable.book),
+        Category("beauty", "뷰티/미용", R.drawable.beauty)
     )
 
     var selectedCategories by remember { mutableStateOf(setOf<String>()) }
@@ -57,7 +54,7 @@ fun CategorySelectionScreen() {
                 navigationIcon = {
                     IconButton(onClick = { /* 뒤로가기 */ }) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            painter = painterResource(id = R.drawable.ic_arrow_back), // drawable의 뒤로가기 아이콘으로 변경
                             contentDescription = "뒤로가기"
                         )
                     }
@@ -83,6 +80,7 @@ fun CategorySelectionScreen() {
                 lineHeight = 33.sp,
                 color = Color.Black,
             )
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = buildAnnotatedString {
@@ -98,6 +96,8 @@ fun CategorySelectionScreen() {
                 fontSize = 14.sp,
                 modifier = Modifier.padding(bottom = 30.dp)
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // 카테고리 그리드
             LazyVerticalGrid(
@@ -129,13 +129,13 @@ fun CategorySelectionScreen() {
                     .padding(vertical = 20.dp)
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
+                    containerColor = Color(0xFF2FB475)
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "확 인",
-                    fontSize = 16.sp,
+                    text = "확    인",
+                    fontSize = 16.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -156,23 +156,17 @@ fun CategoryItem(
             .clickable {
                 onSelectionChanged(!isSelected)
             }
-            .padding(8.dp)
+            .padding(4.dp)
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(70.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    if (isSelected) category.backgroundColor.copy(alpha = 0.8f)
-                    else category.backgroundColor.copy(alpha = 0.1f)
-                )
         ) {
-            Icon(
-                imageVector = category.icon,
+            Image(
+                painter = painterResource(id = category.iconResId),
                 contentDescription = category.name,
-                tint = if (isSelected) Color.White else category.backgroundColor,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(68.dp)
             )
         }
 
@@ -180,10 +174,10 @@ fun CategoryItem(
 
         Text(
             text = category.name,
-            fontSize = 12.sp,
+            fontSize = 14.sp,
             textAlign = TextAlign.Center,
-            color = if (isSelected) Color.Black else Color.Gray,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            color = if (isSelected) Color.Black else Color.DarkGray,
+            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
         )
     }
 }

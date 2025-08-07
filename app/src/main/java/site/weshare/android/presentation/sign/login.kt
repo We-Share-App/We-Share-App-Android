@@ -101,28 +101,48 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // 기존 코드를 이것으로 교체
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
                 .border(1.dp, Color(0xFFD9D9D9), RoundedCornerShape(4.dp))
-                .padding(top = 6.dp, bottom = 12.dp, start = 12.dp),
-            contentAlignment = Alignment.CenterStart
+                .padding(top = 6.dp, bottom = 12.dp, start = 12.dp, end = 12.dp)
         ) {
-            BasicTextField(
-                value = email,
-                onValueChange = { email = it },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                decorationBox = { innerTextField ->
-                    Column {
-                        Text("이메일", color = Color(0xffA9A9A9), fontSize = 9.5.sp)
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text("sogong@gmail.com", color = Color(0xffA9A9A9), fontSize = 13.sp)
-                    }
-                    innerTextField()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    BasicTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        decorationBox = { innerTextField ->
+                            Column {
+                                Text("이메일", color = Color(0xffA9A9A9), fontSize = 9.5.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("sogong@gmail.com", color = Color(0xffA9A9A9), fontSize = 13.sp)
+                            }
+                            innerTextField()
+                        }
+                    )
                 }
-            )
+
+                Icon(
+                    painter = painterResource(id = R.drawable.eye_off_outline), // 또는 원하는 아이콘
+                    contentDescription = "비밀번호 보기",
+                    tint = Color(0xffA9A9A9),
+                    modifier = Modifier
+                        .offset(y = (4).dp)
+                        .size(20.dp)
+                        .clickable { /* 아이콘 클릭 액션 */ }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
