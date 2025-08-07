@@ -192,15 +192,7 @@ fun LocationSettingScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LocationSettingScreenPreview() {
-    LocationSettingScreen(
-        onLocationSet = { selectedCities ->
-            // Preview에서는 실제 동작하지 않음
-        }
-    )
-}
+
 
 private fun readNearbyCities(
     context: Context,
@@ -499,3 +491,12 @@ private fun extractState(cityName: String): String {
 //    return locA.distanceTo(locB).toDouble()
 //}
 //
+@Preview(showBackground = true)
+@Composable
+fun LocationSettingScreenPreview() {
+    LocationSettingScreen(
+        onLocationSet = { selectedCities ->
+            // Preview에서는 실제 동작하지 않음
+        }
+    )
+}
