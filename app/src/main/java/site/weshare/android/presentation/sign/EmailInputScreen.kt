@@ -44,7 +44,7 @@ fun EmailInputScreen(
     Column(
         Modifier.fillMaxSize().padding(start = 28.dp, end = 28.dp, top = 200.dp)
     ) {
-        Text("STEP 4", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
+        Text("STEP 1", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
         Spacer(modifier = Modifier.height(8.dp))
         Text("이메일을 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(24.dp))

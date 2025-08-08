@@ -37,7 +37,7 @@ fun NicknameInputScreen(
             .background(Color(0xffF0F0F0))
             .padding(start = 28.dp, end = 28.dp, top = 200.dp),
         ) {
-        Text("STEP 1", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
+        Text("STEP 3", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold )
         Spacer(modifier = Modifier.height(8.dp))
         Text("닉네임을 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(2.dp))

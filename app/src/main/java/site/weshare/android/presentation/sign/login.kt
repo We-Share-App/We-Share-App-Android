@@ -124,9 +124,9 @@ fun LoginScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         decorationBox = { innerTextField ->
                             Column {
-                                Text("이메일", color = Color(0xffA9A9A9), fontSize = 9.5.sp)
+                                Text("비밀번호", color = Color(0xffA9A9A9), fontSize = 9.5.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text("sogong@gmail.com", color = Color(0xffA9A9A9), fontSize = 13.sp)
+                                Text("비밀번호", color = Color(0xffA9A9A9), fontSize = 13.sp)
                             }
                             innerTextField()
                         }

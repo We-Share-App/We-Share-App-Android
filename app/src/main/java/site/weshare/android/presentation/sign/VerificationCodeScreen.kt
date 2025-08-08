@@ -32,7 +32,7 @@ fun VerificationCodeScreen(
             .fillMaxSize()
             .padding(start = 28.dp, end = 28.dp, top = 200.dp),
         ) {
-        Text("STEP 3", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Text("STEP 2", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Text("전송된 인증번호를 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(24.dp))
