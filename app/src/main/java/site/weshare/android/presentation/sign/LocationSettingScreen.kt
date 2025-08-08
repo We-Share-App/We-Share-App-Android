@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.naver.maps.geometry.LatLng
@@ -190,6 +191,8 @@ fun LocationSettingScreen(
         }
     }
 }
+
+
 
 private fun readNearbyCities(
     context: Context,
@@ -488,3 +491,12 @@ private fun extractState(cityName: String): String {
 //    return locA.distanceTo(locB).toDouble()
 //}
 //
+@Preview(showBackground = true)
+@Composable
+fun LocationSettingScreenPreview() {
+    LocationSettingScreen(
+        onLocationSet = { selectedCities ->
+            // Preview에서는 실제 동작하지 않음
+        }
+    )
+}

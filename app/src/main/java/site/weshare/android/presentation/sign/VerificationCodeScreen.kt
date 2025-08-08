@@ -2,6 +2,7 @@ package site.weshare.android.presentation.sign
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -10,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.launch
 import site.weshare.android.data.remote.api.model.EmailVerifyRequest
 
@@ -28,12 +30,11 @@ fun VerificationCodeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(28.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("STEP 3", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            .padding(start = 28.dp, end = 28.dp, top = 200.dp),
+        ) {
+        Text("STEP 2", style = MaterialTheme.typography.titleMedium, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("전송된 인증번호를 입력하세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Text("전송된 인증번호를 입력해주세요.", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(24.dp))
 
 
@@ -95,10 +96,21 @@ fun VerificationCodeScreen(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2FB475),
+                contentColor = Color.White,
+                disabledContainerColor = Color(0xFF787878),
+                disabledContentColor = Color.LightGray
+            ),
+            shape = RoundedCornerShape(5.dp),
             enabled = code.isNotBlank() && !isLoading
         ) {
-            Text(if (isLoading) "확인 중..." else "확인")
+            Text(
+                text = if (isLoading) "확인 중…" else "확    인",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }

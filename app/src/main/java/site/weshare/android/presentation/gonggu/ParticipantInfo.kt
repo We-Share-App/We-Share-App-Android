@@ -98,7 +98,7 @@ fun GroupPurchaseScreen(
                 .padding(16.dp)
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4CAF50)
+                containerColor = Color(0xFF2FB475)
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
@@ -188,7 +188,7 @@ fun ParticipantItem(
                         Text(
                             text = "안심 사용자입니다",
                             fontSize = 11.sp,
-                            color = Color(0xFF4CAF50)
+                            color = Color(0xFF2FB475)
                         )
                     }
                     UserType.REPORTED -> {
@@ -208,7 +208,7 @@ fun ParticipantItem(
             Button(
                 onClick = onChatClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
+                    containerColor = Color(0xFF2FB475)
                 ),
                 shape = RoundedCornerShape(6.dp),
                 modifier = Modifier
