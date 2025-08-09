@@ -301,7 +301,6 @@ class GongguDetailViewModel(
         }
     }
 
-
     fun clearParticipateResult() {
         _uiState.value = _uiState.value.copy(participateResult = null)
     }
@@ -313,7 +312,8 @@ fun GongguDetailScreenContainer(
     itemId: Int,
     viewModel: GongguDetailViewModel = remember { GongguDetailViewModel() },
     onBackClick: () -> Unit = {},
-    onParticipateClick: (Int) -> Unit = {}
+    onParticipateClick: (Int) -> Unit = {},
+    onOverQuantityClick: (Int) -> Unit = {} // 수량 초과 시 화면 전환을 위한 콜백
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -337,6 +337,43 @@ fun GongguDetailScreenContainer(
                 CircularProgressIndicator()
             }
         }
+        uiState.error != null -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "오류가 발생했습니다",
+                        fontSize = 16.sp,
+                        color = Color.Red
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.error!!,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.loadGongguDetail(itemId) }) {
+                        Text("다시 시도")
+                    }
+                }
+            }
+        }
+        uiState.item != null -> {
+            GongguDetailScreen(
+                item = uiState.item!!,
+                onBackClick = onBackClick,
+                onHeartClick = {
+                    // 좋아요 기능 구현
+                    println("Heart clicked for item: ${uiState.item!!.id}")
+                },
+                onParticipateClick = onParticipateClick,
+                onOverQuantityClick = onOverQuantityClick, // 콜백 전달
+                isLiked = uiState.isLiked
+            )
+        }
     }
 }
 
@@ -347,6 +384,7 @@ fun GongguDetailScreen(
     onBackClick: () -> Unit = {},
     onHeartClick: () -> Unit = {},
     onParticipateClick: (Int) -> Unit = {},
+    onOverQuantityClick: (Int) -> Unit = {}, // 수량 초과 시 화면 전환을 위한 콜백
     isLiked: Boolean = false,
     initialQuantity: Int = 0,
     onReportClick: () -> Unit = {},
@@ -355,7 +393,6 @@ fun GongguDetailScreen(
 ) {
     var selectedQuantity by remember { mutableStateOf(initialQuantity) }
     val overLimit = selectedQuantity > item.remainingQuantity
-    var showMoreMenu by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -363,9 +400,8 @@ fun GongguDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .then(if (overLimit) Modifier.blur(3.dp) else Modifier)
         ) {
-            // Top App Bar (메뉴 제거)
+            // Top App Bar
             TopAppBar(
                 title = { Text("공동구매 참여하기", fontSize = 16.sp) },
                 navigationIcon = {
@@ -414,7 +450,7 @@ fun GongguDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Title and Heart (더보기 메뉴는 여기서만)
+                // Title and Heart
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -437,93 +473,6 @@ fun GongguDetailScreen(
                             tint = if (isLiked) Color.Red else Color.Gray
                         )
                     }
-                    Box {
-                        IconButton(
-                            onClick = { showMoreMenu = true },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.MoreVert,
-                                contentDescription = "더보기",
-                                modifier = Modifier.size(24.dp),
-                                tint = Color.Gray
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = showMoreMenu,
-                            onDismissRequest = { showMoreMenu = false },
-                            shape = RoundedCornerShape(0.dp),
-                            shadowElevation = 5.dp,
-                            tonalElevation = 0.dp,
-                            containerColor = Color.White,
-                            modifier = Modifier.padding(0.dp)
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.report),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text("신고하기", fontSize = 14.sp)
-                                    }
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    onReportClick()
-                                },
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-                                modifier = Modifier.height(30.dp)
-                            )
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.share),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text("공유하기", fontSize = 14.sp)
-                                    }
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    onShareClick()
-                                },
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-                                modifier = Modifier.height(30.dp)
-                            )
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.ask),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text("문의하기", fontSize = 14.sp)
-                                    }
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    onInquiryClick()
-                                },
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-                                modifier = Modifier.height(30.dp)
-                            )
-                        }
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(1.dp))
@@ -540,8 +489,7 @@ fun GongguDetailScreen(
 
                 // Quantity Info
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(-3.dp)
                 ) {
                     Row(
@@ -757,109 +705,121 @@ fun GongguDetailScreen(
 
                 Spacer(modifier = Modifier.height(100.dp))
             }
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shadowElevation = 8.dp,
-                    color = Color.White
+
+            // Bottom Section
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shadowElevation = 8.dp,
+                color = Color.White
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 15.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                            .height(40.dp)
+                            .width(90.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                        IconButton(
+                            onClick = {
+                                if (selectedQuantity > 0) selectedQuantity--
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        Divider(
                             modifier = Modifier
-                                .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
                                 .height(40.dp)
-                                .width(90.dp)
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    if (selectedQuantity > 0) selectedQuantity--
-                                },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            }
+                                .width(1.dp),
+                            color = Color.LightGray
+                        )
 
-                            Divider(
-                                modifier = Modifier
-                                    .height(40.dp)
-                                    .width(1.dp),
-                                color = Color.LightGray
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 12.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "$selectedQuantity",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-
-                            Divider(
-                                modifier = Modifier
-                                    .height(40.dp)
-                                    .width(1.dp),
-                                color = Color.LightGray
-                            )
-
-                            IconButton(
-                                onClick = {
-                                    selectedQuantity++
-                                },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(24.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            val priceText = item.price.replace(",", "").replace("원", "")
-                            val totalPrice = priceText.toIntOrNull() ?: 0
-                            val unitPrice = totalPrice / item.totalQuantity  // 개당 가격
-                            val myTotalPrice = selectedQuantity * unitPrice  // 내가 설정한 개수만큼의 총 가격
-
-                            Text(
-                                text = "${String.format("%,d", myTotalPrice)}원",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Blue
-                            )
-                            Text(text = "무료배송", fontSize = 11.sp, color = Color.Black)
-                        }
-                        Button(
-                            onClick = { onParticipateClick(selectedQuantity) },
-                            enabled = selectedQuantity <= item.remainingQuantity && item.remainingQuantity > 0,
+                        Box(
                             modifier = Modifier
-                                .height(37.dp)
-                                .width(100.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FB475)),
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(0.dp)
+                                .weight(1f)
+                                .padding(horizontal = 12.dp),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "참여하기",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                text = "$selectedQuantity",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
                             )
                         }
+
+                        Divider(
+                            modifier = Modifier
+                                .height(40.dp)
+                                .width(1.dp),
+                            color = Color.LightGray
+                        )
+
+                        IconButton(
+                            onClick = {
+                                println("현재 수량: $selectedQuantity, 남은 수량: ${item.remainingQuantity}") // 디버그 로그
+                                if (selectedQuantity >= item.remainingQuantity) {
+                                    println("수량 초과 감지! 화면 전환 시도") // 디버그 로그
+                                    onOverQuantityClick(item.remainingQuantity)
+                                } else {
+                                    selectedQuantity++
+                                    println("수량 증가: $selectedQuantity") // 디버그 로그
+                                }
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(24.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        val priceText = item.price.replace(",", "").replace("원", "")
+                        val totalPrice = priceText.toIntOrNull() ?: 0
+                        val unitPrice = totalPrice / item.totalQuantity  // 개당 가격
+                        val myTotalPrice = selectedQuantity * unitPrice  // 내가 설정한 개수만큼의 총 가격
+
+                        Text(
+                            text = "${String.format("%,d", myTotalPrice)}원",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Blue
+                        )
+                        Text(text = "무료배송", fontSize = 11.sp, color = Color.Black)
+                    }
+
+                    Button(
+                        onClick = {
+                            // 정상적인 참여 처리 (수량 체크는 + 버튼에서 이미 처리됨)
+                            onParticipateClick(selectedQuantity)
+                        },
+                        enabled = selectedQuantity > 0 && item.remainingQuantity > 0,
+                        modifier = Modifier
+                            .height(37.dp)
+                            .width(100.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FB475)),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(
+                            "참여하기",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     }
                 }
             }
         }
     }
-
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -889,9 +849,10 @@ fun GongguDetailScreenPreview() {
     MaterialTheme {
         GongguDetailScreen(
             item = mockItem,
-            onReportClick = { /* 신고하기 처리 */ },
-            onShareClick = { /* 공유하기 처리 */ },
-            onInquiryClick = { /* 문의하기 처리 */ }
+            onOverQuantityClick = { remainingQuantity ->
+                // 수량 초과 시 처리 - 예: Navigation
+                println("수량 초과! 남은 수량: $remainingQuantity")
+            }
         )
     }
 }

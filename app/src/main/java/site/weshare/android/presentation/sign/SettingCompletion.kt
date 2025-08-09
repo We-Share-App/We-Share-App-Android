@@ -55,7 +55,7 @@ fun SettingCompletionScreen(
         ) {
             // 체크 아이콘이 들어갈 원형 배경
             Image(
-                painter = painterResource(id = R.drawable.checkgreen),
+                painter = painterResource(id = R.drawable.congra),
                 contentDescription = null,
                 modifier = Modifier.size(115.dp)
             )
@@ -71,7 +71,7 @@ fun SettingCompletionScreen(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "지도 설정을 완료했어요",
+                text = "모든 설정을 완료했어요",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
@@ -94,7 +94,7 @@ fun SettingCompletionScreen(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "내 취향 카테고리 설정하기",
+                    text = "확   인",
                     fontSize = 16.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -108,6 +108,6 @@ fun SettingCompletionScreen(
 @Composable
 fun SettingCompletionScreenPreview() {
     MaterialTheme {
-        CompletionScreen(userName = "홍길동")
+        SettingCompletionScreen(userName = "홍길동")
     }
 }
