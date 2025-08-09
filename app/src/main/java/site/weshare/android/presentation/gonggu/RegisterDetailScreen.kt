@@ -36,7 +36,7 @@ fun RegisterDetailScreen() {
     var shareUrl by remember { mutableStateOf("") }
     var showInfoModal by remember { mutableStateOf(false) }
     var showPriceInfoModal by remember { mutableStateOf(false) }
-    var showCalendarModal by remember { mutableStateOf(false) }
+    var showCalendarModal by remember { mutableStateOf(false) } // 🔥 캘린더 모달 상태 추가
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -219,7 +219,7 @@ fun RegisterDetailScreen() {
                         modifier = Modifier
                             .size(20.dp)
                             .offset(y = (-2).dp)
-                            .clickable { showCalendarModal = true } // 이 부분 추가
+                            .clickable { showCalendarModal = true } // 🔥 캘린더 모달 표시
                     )
                 }
             }
@@ -404,6 +404,18 @@ fun RegisterDetailScreen() {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // 🔥 CalendarModal 추가
+        if (showCalendarModal) {
+            CalendarModal(
+                selectedDate = selectedDate,
+                onDateSelected = { date ->
+                    selectedDate = date
+                    showCalendarModal = false
+                },
+                onDismiss = { showCalendarModal = false }
+            )
         }
     }
 }

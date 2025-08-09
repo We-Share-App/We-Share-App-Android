@@ -148,11 +148,12 @@ fun GongguMainScreen(
                     )
                 }
 
-                // RegisterOverlay
+                // RegisterOverlay - 🔥 공동구매 등록하기 버튼 클릭 시 RegisterDetailScreen으로 이동하도록 수정
                 if (showRegisterOverlay) {
                     RegisterOverlay(
                         onRegisterClick = {
-                            println("Navigate to register form")
+                            // 🔥 RegisterDetailScreen으로 네비게이션
+                            navController.navigate("register_detail")
                             showRegisterOverlay = false
                         },
                         onDismiss = {
@@ -177,6 +178,11 @@ fun GongguMainScreen(
                         navController.popBackStack()
                     }
                 )
+            }
+
+            // 🔥 RegisterDetailScreen 네비게이션 추가
+            composable("register_detail") {
+                RegisterDetailScreen()
             }
         }
 
