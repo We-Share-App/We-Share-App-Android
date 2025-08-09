@@ -48,72 +48,53 @@ fun GongguProductListBody(
     onRegisterClick: () -> Unit = {},
     onMenuAction: (GongguItem, String) -> Unit = { _, _ -> }
 ) {
-    Box(
+    // 🔥 Box 제거하고 Column만 사용 (FAB는 GongguMainScreen에서 관리)
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
+        // 상품 개수 표시
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // 상품 개수 표시
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("상품 $totalCount", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { }) {
-                    Text("최신순", fontSize = 12.sp, color = Color.Gray)
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
-                }
+            Text("상품 $totalCount", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { }) {
+                Text("최신순", fontSize = 12.sp, color = Color.Gray)
+                Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
             }
+        }
 
-            if (isLoading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 100.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
-                ) {
-                    items(items, key = { it.id }) { item ->
-                        GongguItemCard(
-                            item = item,
-                            onClick = { onItemClick(item) },
-                            onLikeClick = { onLikeClick(item.id) },
-                            onMenuAction = { action -> onMenuAction(item, action) }
-                        )
+        if (isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 100.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                items(items, key = { it.id }) { item ->
+                    GongguItemCard(
+                        item = item,
+                        onClick = { onItemClick(item) },
+                        onLikeClick = { onLikeClick(item.id) },
+                        onMenuAction = { action -> onMenuAction(item, action) }
+                    )
 
-                        if (item != items.last()) {
-                            Divider(color = Color.LightGray, thickness = 0.5.dp)
-                        }
+                    if (item != items.last()) {
+                        Divider(color = Color.LightGray, thickness = 0.5.dp)
                     }
                 }
             }
         }
-
-        // 등록하기 FAB 버튼
-        FloatingActionButton(
-            onClick = onRegisterClick,
-            containerColor = Color(0xFF2FB475),
-            shape = RoundedCornerShape(30.dp),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 35.dp, bottom = 100.dp)
-                .size(width = 100.dp, height = 45.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("등록하기", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
-        }
     }
+    // 🔥 FAB 버튼 제거 - GongguMainScreen에서 관리
 }
 
 // ==================== Item Card Component ====================

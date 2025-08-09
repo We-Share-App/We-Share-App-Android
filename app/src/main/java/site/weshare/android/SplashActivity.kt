@@ -26,6 +26,9 @@ import site.weshare.android.presentation.sign.NicknameInputScreen
 import site.weshare.android.presentation.sign.VerificationCodeScreen
 import site.weshare.android.presentation.sign.login.LoginScreen
 import site.weshare.android.presentation.sign.login.NaverLoginWebViewScreen
+import site.weshare.android.presentation.sign.CompletionScreen
+import site.weshare.android.presentation.sign.CategorySelectionScreen
+import site.weshare.android.presentation.sign.SettingCompletionScreen
 import site.weshare.android.presentation.splash.SplashScreen
 import site.weshare.android.ui.theme.KachiAndroidTheme
 
@@ -142,7 +145,54 @@ class SplashActivity : ComponentActivity() {
                         composable("location_setting") {
                             LocationSettingScreen(
                                 onLocationSet = {
-                                    // 위치 설정이 완료되면 MainActivity로 이동
+                                    // 위치 설정 완료 후 CompletionScreen으로 이동
+                                    navController.navigate("completion") {
+                                        popUpTo("nickname_input") { inclusive = true } // 이전 스택 정리 (선택사항)
+                                    }
+                                }
+                            )
+                        }
+
+                        // 3. 첫 번째 완료 화면 (지역 설정 완료)
+                        composable("completion") {
+                            CompletionScreen(
+                                userName = "사용자명", // 실제로는 저장된 닉네임을 가져와야 함
+                                onBackClick = {
+                                    navController.popBackStack()
+                                },
+                                onStartRecommendationClick = {
+                                    // 카테고리 선택 화면으로 이동
+                                    navController.navigate("category_selection") {
+                                        popUpTo("location_setting") { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+
+                        // 4. 카테고리 선택 화면
+                        composable("category_selection") {
+                            CategorySelectionScreen(
+                                onBackClick = {
+                                    navController.popBackStack()
+                                },
+                                onConfirmClick = {
+                                    // 설정 완료 화면으로 이동
+                                    navController.navigate("setting_completion") {
+                                        popUpTo("completion") { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+
+                        // 5. 최종 완료 화면 (모든 설정 완료)
+                        composable("setting_completion") {
+                            SettingCompletionScreen(
+                                userName = "사용자명", // 실제로는 저장된 닉네임을 가져와야 함
+                                onBackClick = {
+                                    navController.popBackStack()
+                                },
+                                onStartRecommendationClick = {
+                                    // 모든 설정 완료 후 MainActivity로 이동
                                     sharedPreferences.edit().putBoolean("is_logged_in", true).apply()
                                     startActivity(Intent(this@SplashActivity, MainActivity::class.java).apply {
                                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -151,7 +201,6 @@ class SplashActivity : ComponentActivity() {
                                 }
                             )
                         }
-
                     }
                 }
             }

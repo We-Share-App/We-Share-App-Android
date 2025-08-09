@@ -337,6 +337,51 @@ fun GongguDetailScreenContainer(
                 CircularProgressIndicator()
             }
         }
+        uiState.error != null -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "오류가 발생했습니다",
+                        fontSize = 16.sp,
+                        color = Color.Red
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.error!!,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.loadGongguDetail(itemId) }) {
+                        Text("다시 시도")
+                    }
+                }
+            }
+        }
+        uiState.item != null -> {
+            GongguDetailScreen(
+                item = uiState.item!!,
+                onBackClick = onBackClick,
+                onHeartClick = {
+                    // 좋아요 기능 구현
+                    println("Heart clicked for item: ${uiState.item!!.id}")
+                },
+                onParticipateClick = onParticipateClick,
+                isLiked = uiState.isLiked,
+                onReportClick = {
+                    println("Report clicked for item: ${uiState.item!!.id}")
+                },
+                onShareClick = {
+                    println("Share clicked for item: ${uiState.item!!.id}")
+                },
+                onInquiryClick = {
+                    println("Inquiry clicked for item: ${uiState.item!!.id}")
+                }
+            )
+        }
     }
 }
 

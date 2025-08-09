@@ -31,7 +31,10 @@ data class Category(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategorySelectionScreen() {
+fun CategorySelectionScreen(
+    onBackClick: () -> Unit = {},      // 추가된 매개변수
+    onConfirmClick: () -> Unit = {}    // 추가된 매개변수
+) {
     val categories = listOf(
         Category("clothes", "의류", R.drawable.clothed), // 실제 drawable 이름으로 변경
         Category("shoes", "신발", R.drawable.shoes),
@@ -52,7 +55,7 @@ fun CategorySelectionScreen() {
             TopAppBar(
                 title = { },
                 navigationIcon = {
-                    IconButton(onClick = { /* 뒤로가기 */ }) {
+                    IconButton(onClick = onBackClick) { // 수정된 부분
                         Icon(
                             painter = painterResource(id = R.drawable.ic_arrow_back), // drawable의 뒤로가기 아이콘으로 변경
                             contentDescription = "뒤로가기"
@@ -123,7 +126,7 @@ fun CategorySelectionScreen() {
 
             // 확인 버튼
             Button(
-                onClick = { /* 확인 처리 */ },
+                onClick = onConfirmClick, // 수정된 부분
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 20.dp)
