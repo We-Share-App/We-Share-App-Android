@@ -27,7 +27,12 @@ fun GongguMoreMenu(
 
     Box {
         IconButton(onClick = { menuExpanded = true }) {
-            Icon(Icons.Default.MoreVert, contentDescription = "더보기")
+            Icon(
+                Icons.Default.MoreVert,
+                contentDescription = "더보기",
+                modifier = Modifier.size(18.dp), // 더 작게
+                tint = Color(0xFF909090) // 연한 회색
+            )
         }
 
         DropdownMenu(

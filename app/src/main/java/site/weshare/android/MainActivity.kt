@@ -1,6 +1,5 @@
 package site.weshare.android
 
-import ExchangeProposalScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,6 +39,8 @@ import site.weshare.android.presentation.barter.BarterScreen
 import site.weshare.android.presentation.chat.ChatScreen
 import site.weshare.android.presentation.gonggu.GongguMainScreen
 import site.weshare.android.presentation.home.HomeScreen
+import site.weshare.android.presentation.mypage.MyPageScreen
+import site.weshare.android.presentation.mypage.EditMyInfoScreen
 import site.weshare.android.presentation.sign.EmailInputScreen
 import site.weshare.android.presentation.sign.VerificationCodeScreen
 import site.weshare.android.presentation.sign.login.LoginScreen
@@ -142,9 +143,14 @@ fun AppMain(){
             composable("tab4") {
                 ChatScreen()
             }
-//            composable("tab5"){
-//                MyPageScreen()
-//            }
+            composable("tab5") {
+                MyPageScreen(navController)   // 파라미터 꼭 넘겨야 함
+            }
+
+            // ✅ 프로필 수정 화면
+            composable("edit_profile") {
+                EditMyInfoScreen(navController)
+            }
 
 
         }

@@ -1,4 +1,4 @@
-package com.example.grouppurchase
+package site.weshare.android.presentation.gonggu
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,7 +47,7 @@ fun GroupPurchaseScreen(
     participants: List<Participant> = sampleParticipants(),
     onBackClick: () -> Unit = {},
     onChatClick: (String) -> Unit = {},
-    onCompleteAllClick: () -> Unit = {}
+    onCompleteAllClick: () -> Unit = {} // 🔥 이 콜백으로 다이얼로그 화면 네비게이션 처리
 ) {
     Column(
         modifier = Modifier
@@ -92,7 +92,7 @@ fun GroupPurchaseScreen(
 
         // 공동구매 완료 버튼
         Button(
-            onClick = onCompleteAllClick,
+            onClick = onCompleteAllClick, // 🔥 이 콜백이 다이얼로그 화면으로 네비게이션
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -103,7 +103,7 @@ fun GroupPurchaseScreen(
             shape = RoundedCornerShape(8.dp)
         ) {
             Text(
-                text = "공동구매 완료 버튼",
+                text = "공동구매 채팅방 만들기",
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
@@ -226,8 +226,6 @@ fun ParticipantItem(
     }
 }
 
-
-
 // 샘플 데이터
 fun sampleParticipants() = listOf(
     Participant(
@@ -267,8 +265,57 @@ fun sampleParticipants() = listOf(
     )
 )
 
+// ==================== 사용 예시 ====================
+/*
+NavGraph에서 이렇게 사용하세요:
+
+composable("participants") {
+    GroupPurchaseScreen(
+        participants = sampleParticipants(),
+        onBackClick = {
+            navController.popBackStack()
+        },
+        onChatClick = { participantId ->
+            println("Chat with participant: $participantId")
+        },
+        onCompleteAllClick = {
+            // 🔥 다이얼로그 화면으로 네비게이션
+            navController.navigate("dialog")
+        }
+    )
+}
+*/
+
+@Composable
+fun GongguWithDialogDemo() {
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        DialogScreen(
+            onConfirmClick = {
+                println("네 버튼 클릭됨")
+                showDialog = false
+            },
+            onCancelClick = {
+                showDialog = false
+            }
+        )
+    } else {
+        GroupPurchaseScreen(
+            participants = sampleParticipants(),
+            onBackClick = {},
+            onChatClick = { participantId ->
+                println("Chat with participant: $participantId")
+            },
+            onCompleteAllClick = {
+                showDialog = true  // 🔥 버튼 클릭 시 다이얼로그 화면으로 전환
+            }
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun GroupPurchaseScreenPreview() {
-    GroupPurchaseScreen()
+    GongguWithDialogDemo()
 }

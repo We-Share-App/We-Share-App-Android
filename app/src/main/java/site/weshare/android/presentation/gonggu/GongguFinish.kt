@@ -55,15 +55,16 @@ fun ClosedGongguScreen(
                 color = Color.White
             ) {
                 Button(
-                    onClick = onCreateChatRoom,
+                    onClick = onCreateChatRoom, // 🔥 이 콜백으로 네비게이션 처리
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(68.dp)
                         .padding(horizontal = 20.dp, vertical = 8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FB475)),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        "공동구매 채팅창 만들기",
+                        "공동구매 채팅방 만들기",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -74,16 +75,72 @@ fun ClosedGongguScreen(
     }
 }
 
+// ==================== 참여자 화면과 다이얼로그 연결 함수 ====================
+// ==================== 참여자 화면과 다이얼로그, 채팅 연결 함수 ====================
+@Composable
+fun GongguWithDialogDemo(
+    onBackClick: () -> Unit = {}
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var showChat by remember { mutableStateOf(false) }
+
+    if (showChat) {
+        ChatScreen(
+            onBackClick = {
+                showChat = false
+                showDialog = false  // 채팅에서 뒤로가기 시 참여자 화면으로
+            },
+            onMenuClick = {
+                println("Menu clicked")
+            },
+            onSendMessage = { message ->
+                println("Message sent: $message")
+            }
+        )
+    } else if (showDialog) {
+        DialogScreen(
+            onConfirmClick = {
+                showChat = true  // 🔥 네 버튼 클릭 시 채팅 화면으로 전환
+            },
+            onCancelClick = {
+                showDialog = false
+            }
+        )
+    } else {
+        GroupPurchaseScreen(
+            participants = sampleParticipants(),
+            onBackClick = onBackClick,
+            onChatClick = { participantId ->
+                println("Chat with participant: $participantId")
+            },
+            onCompleteAllClick = {
+                showDialog = true  // 🔥 버튼 클릭 시 다이얼로그 화면으로 전환
+            }
+        )
+    }
+}
+
 // ==================== 데모용 화면 ====================
 @Composable
 fun ClosedGongguScreenDemo() {
-    // 바로 마감 화면이 보이도록 수정
-    ClosedGongguScreen(
-        onCreateChatRoom = {
-            // 채팅창 만들기 버튼 클릭 시 처리할 로직
-            println("채팅창 만들기 버튼 클릭됨")
-        }
-    )
+    // 🔥 상태 변수 추가
+    var showParticipants by remember { mutableStateOf(false) }
+
+    if (showParticipants) {
+        // 🔥 참여자 화면 표시 (다이얼로그 연결 포함)
+        GongguWithDialogDemo(
+            onBackClick = {
+                showParticipants = false  // 뒤로가기 시 마감 화면으로 돌아감
+            }
+        )
+    } else {
+        // 🔥 마감 화면 표시
+        ClosedGongguScreen(
+            onCreateChatRoom = {
+                showParticipants = true  // 버튼 클릭 시 참여자 화면으로 전환
+            }
+        )
+    }
 }
 
 @Preview(showBackground = true, name = "Closed Gonggu Screen Preview")

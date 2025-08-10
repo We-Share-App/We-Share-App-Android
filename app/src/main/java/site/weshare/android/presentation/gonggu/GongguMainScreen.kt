@@ -20,6 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.registeroverlay.RegisterOverlay
 
+
 /**
  * 공동구매 메인 화면 - 완전히 독립적으로 동작
  * MainActivity에서 파라미터 없이 호출 가능
@@ -109,7 +110,14 @@ fun GongguMainScreen(
                             // 🔥 여기서 showRegisterOverlay 상태 변경
                             showRegisterOverlay = true
                         },
-                        onMenuAction = onMenuAction
+                        onMenuAction = { item, action ->
+                            // 드롭다운에서 직접 처리
+                            when (action) {
+                                "report" -> println("신고하기 clicked for item: ${item.id}")
+                                "share" -> println("공유하기 clicked for item: ${item.id}")
+                                "inquiry" -> println("문의하기 clicked for item: ${item.id}")
+                            }
+                        }
                     )
                 }
 
@@ -184,6 +192,7 @@ fun GongguMainScreen(
             composable("register_detail") {
                 RegisterDetailScreen()
             }
+
         }
 
         // 🔥 메인 화면이고 RegisterOverlay가 표시되지 않을 때만 등록하기 FAB 표시
