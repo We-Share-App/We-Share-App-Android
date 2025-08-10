@@ -156,12 +156,25 @@ fun GongguMainScreen(
                     )
                 }
 
-                // RegisterOverlay - 🔥 공동구매 등록하기 버튼 클릭 시 RegisterDetailScreen으로 이동하도록 수정
+//                // RegisterOverlay - 🔥 공동구매 등록하기 버튼 클릭 시 RegisterDetailScreen으로 이동하도록 수정
+//                if (showRegisterOverlay) {
+//                    RegisterOverlay(
+//                        onRegisterClick = {
+//                            // 🔥 RegisterDetailScreen으로 네비게이션
+//                            navController.navigate("register_detail")
+//                            showRegisterOverlay = false
+//                        },
+//                        onDismiss = {
+//                            showRegisterOverlay = false
+//                        }
+//                    )
+//                }
+
+                // RegisterOverlay - 🔥 등록하기 버튼 클릭 시 외부 콜백 호출로 변경
                 if (showRegisterOverlay) {
                     RegisterOverlay(
                         onRegisterClick = {
-                            // 🔥 RegisterDetailScreen으로 네비게이션
-                            navController.navigate("register_detail")
+                            onRegisterClick()       // ✅ 외부로 넘겨서 MainActivity가 GongguRoutes.RegisterDetail로 navigate
                             showRegisterOverlay = false
                         },
                         onDismiss = {
@@ -169,6 +182,7 @@ fun GongguMainScreen(
                         }
                     )
                 }
+
             }
 
             // 🔥 상세 화면도 내부에서 처리 (수정됨)
@@ -188,10 +202,10 @@ fun GongguMainScreen(
                 )
             }
 
-            // 🔥 RegisterDetailScreen 네비게이션 추가
-            composable("register_detail") {
-                RegisterDetailScreen()
-            }
+//            // 🔥 RegisterDetailScreen 네비게이션 추가
+//            composable("register_detail") {
+//                RegisterDetailScreen()
+//            }
 
         }
 

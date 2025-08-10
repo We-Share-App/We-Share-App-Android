@@ -28,7 +28,10 @@ import site.weshare.android.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterDetailScreen() {
+fun RegisterDetailScreen(
+    onCloseClick: () -> Unit = {},    // 추가
+    onSubmitClick: () -> Unit = {}    // 추가
+) {
     var selectedDate by remember { mutableStateOf("2025-07-10") }
     var guestCount by remember { mutableStateOf(0) }
     var myGuestCount by remember { mutableStateOf(0) }
@@ -387,7 +390,7 @@ fun RegisterDetailScreen() {
 
             // 등록 버튼
             Button(
-                onClick = { },
+                onClick = { onSubmitClick() }, // ✅
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),

@@ -227,6 +227,13 @@ object BarterRoutes {
     const val RegisterPrivate = "barter/privateRegister" // 프라이빗 레지스터
 }
 
+
+// ✅ 추가
+object GongguRoutes {
+    const val RegisterDetail = "gonggu/registerDetail"
+}
+
+
 @Composable
 fun AppMain() {
     val navController = rememberNavController()
@@ -278,7 +285,14 @@ fun AppMain() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("tab1") { HomeScreen() }
-            composable("tab2") { GongguMainScreen() }
+//            composable("tab2") { GongguMainScreen() }
+            // ✅ tab2에서 등록 화면으로 이동 콜백 전달
+            composable("tab2") {
+                GongguMainScreen(
+                    onRegisterClick = { navController.navigate(GongguRoutes.RegisterDetail) }
+                )
+            }
+
             composable("tab3") {
                 // MainScreen 쪽으로 콜백 전달
                 MainScreen(
@@ -313,6 +327,21 @@ fun AppMain() {
                         navController.navigate("tab3") {
                             popUpTo("tab3") { inclusive = false }
                             launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+
+            // ✅ 공구 등록 화면 라우트 추가 (등록/닫기 시 tab2로 복귀)
+            composable(GongguRoutes.RegisterDetail) {
+                site.weshare.android.presentation.gonggu.RegisterDetailScreen(
+                    onCloseClick = { navController.popBackStack() },
+                    onSubmitClick = {
+                        navController.navigate("tab2") {
+                            popUpTo("tab2") { inclusive = false }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 )
