@@ -58,6 +58,7 @@ fun ClosedGongguScreen(
                     onClick = onCreateChatRoom, // 🔥 이 콜백으로 네비게이션 처리
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(68.dp)
                         .padding(horizontal = 20.dp, vertical = 8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2FB475)),
                     shape = RoundedCornerShape(8.dp)
@@ -74,45 +75,72 @@ fun ClosedGongguScreen(
     }
 }
 
-// ==================== 사용 예시 ====================
-/*
-기존 화면에서 이렇게 사용하세요:
+// ==================== 참여자 화면과 다이얼로그 연결 함수 ====================
+// ==================== 참여자 화면과 다이얼로그, 채팅 연결 함수 ====================
+@Composable
+fun GongguWithDialogDemo(
+    onBackClick: () -> Unit = {}
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var showChat by remember { mutableStateOf(false) }
 
-ClosedGongguScreen(
-    onCreateChatRoom = {
-        // 🔥 참여자 화면으로 네비게이션
-        navController.navigate("participants")
+    if (showChat) {
+        ChatScreen(
+            onBackClick = {
+                showChat = false
+                showDialog = false  // 채팅에서 뒤로가기 시 참여자 화면으로
+            },
+            onMenuClick = {
+                println("Menu clicked")
+            },
+            onSendMessage = { message ->
+                println("Message sent: $message")
+            }
+        )
+    } else if (showDialog) {
+        DialogScreen(
+            onConfirmClick = {
+                showChat = true  // 🔥 네 버튼 클릭 시 채팅 화면으로 전환
+            },
+            onCancelClick = {
+                showDialog = false
+            }
+        )
+    } else {
+        GroupPurchaseScreen(
+            participants = sampleParticipants(),
+            onBackClick = onBackClick,
+            onChatClick = { participantId ->
+                println("Chat with participant: $participantId")
+            },
+            onCompleteAllClick = {
+                showDialog = true  // 🔥 버튼 클릭 시 다이얼로그 화면으로 전환
+            }
+        )
     }
-)
-
-그리고 NavGraph에 이 라우트를 추가하세요:
-
-composable("participants") {
-    GroupPurchaseScreen(
-        participants = sampleParticipants(),
-        onBackClick = {
-            navController.popBackStack()
-        },
-        onChatClick = { participantId ->
-            println("Chat with participant: $participantId")
-        },
-        onCompleteAllClick = {
-            println("Group purchase completed")
-        }
-    )
 }
-*/
 
 // ==================== 데모용 화면 ====================
 @Composable
 fun ClosedGongguScreenDemo() {
-    // 바로 마감 화면이 보이도록 수정
-    ClosedGongguScreen(
-        onCreateChatRoom = {
-            // 🔥 실제 사용 시에는 navController.navigate("participants")로 교체
-            println("채팅방 만들기 버튼 클릭됨 - participants 화면으로 이동")
-        }
-    )
+    // 🔥 상태 변수 추가
+    var showParticipants by remember { mutableStateOf(false) }
+
+    if (showParticipants) {
+        // 🔥 참여자 화면 표시 (다이얼로그 연결 포함)
+        GongguWithDialogDemo(
+            onBackClick = {
+                showParticipants = false  // 뒤로가기 시 마감 화면으로 돌아감
+            }
+        )
+    } else {
+        // 🔥 마감 화면 표시
+        ClosedGongguScreen(
+            onCreateChatRoom = {
+                showParticipants = true  // 버튼 클릭 시 참여자 화면으로 전환
+            }
+        )
+    }
 }
 
 @Preview(showBackground = true, name = "Closed Gonggu Screen Preview")

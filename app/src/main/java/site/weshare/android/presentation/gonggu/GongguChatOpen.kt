@@ -180,16 +180,38 @@ composable("chat") {
 }
 */
 
+// ==================== 다이얼로그와 채팅 연결 함수 ====================
+@Composable
+fun DialogWithChatDemo(
+    onBackClick: () -> Unit = {}
+) {
+    var showChat by remember { mutableStateOf(false) }
+
+    DialogScreen(
+        onConfirmClick = {
+            showChat = true  // 🔥 네 버튼 클릭 시 채팅 화면으로 전환
+        },
+        onCancelClick = onBackClick
+    )
+
+    if (showChat) {
+        ChatScreen(
+            onBackClick = {
+                showChat = false  // 🔥 채팅에서 뒤로가기 시 다이얼로그로 돌아감
+            },
+            onMenuClick = {
+                println("Menu clicked")
+            },
+            onSendMessage = { message ->
+                println("Message sent: $message")
+            }
+        )
+    }
+}
+
 // 프리뷰
 @Preview(showBackground = true)
 @Composable
 fun DialogScreenPreview() {
-    DialogScreen(
-        onConfirmClick = {
-            println("네 버튼 클릭됨 - 다음 화면으로 이동")
-        },
-        onCancelClick = {
-            println("아니오 버튼 클릭됨 - 이전 화면으로 이동")
-        }
-    )
+    DialogWithChatDemo()
 }

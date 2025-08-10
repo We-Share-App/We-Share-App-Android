@@ -103,7 +103,7 @@ fun GroupPurchaseScreen(
             shape = RoundedCornerShape(8.dp)
         ) {
             Text(
-                text = "공동구매 완료 버튼",
+                text = "공동구매 채팅방 만들기",
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
@@ -286,8 +286,36 @@ composable("participants") {
 }
 */
 
+@Composable
+fun GongguWithDialogDemo() {
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        DialogScreen(
+            onConfirmClick = {
+                println("네 버튼 클릭됨")
+                showDialog = false
+            },
+            onCancelClick = {
+                showDialog = false
+            }
+        )
+    } else {
+        GroupPurchaseScreen(
+            participants = sampleParticipants(),
+            onBackClick = {},
+            onChatClick = { participantId ->
+                println("Chat with participant: $participantId")
+            },
+            onCompleteAllClick = {
+                showDialog = true  // 🔥 버튼 클릭 시 다이얼로그 화면으로 전환
+            }
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun GroupPurchaseScreenPreview() {
-    GroupPurchaseScreen()
+    GongguWithDialogDemo()
 }

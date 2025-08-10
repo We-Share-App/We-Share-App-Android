@@ -48,7 +48,7 @@ fun ProfileHeader(
             painter = profileImagePainter,
             contentDescription = "프로필 사진",
             modifier = Modifier
-                .size(69.dp)
+                .size(90.dp)
                 .clip(CircleShape) // 원형으로 클립
                 .padding(12.dp) // 아이콘 안쪽 여백
         )
@@ -93,7 +93,8 @@ fun MenuItem(
                 Text(
                     text = it,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xff666666)
                 )
             }
         }
@@ -110,8 +111,8 @@ fun MenuItem(
 fun SectionHeader(title: String, modifier: Modifier = Modifier) {
     Text(
         text = title,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.ExtraBold,
         modifier = modifier.padding(bottom = 8.dp, start = 10.dp)
     )
 }
@@ -181,7 +182,7 @@ fun MyPageScreen(navController: NavController) {
         SectionHeader(title = "내 게시글")
         Spacer(modifier = Modifier.height(8.dp))
         Card(
-            modifier = Modifier.fillMaxWidth().border(0.7.dp, Color.Gray, RoundedCornerShape(12.dp)),
+            modifier = Modifier.fillMaxWidth().border(0.7.dp, Color(0xffC7C7C7), RoundedCornerShape(12.dp)),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
