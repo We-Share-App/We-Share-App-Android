@@ -33,6 +33,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import site.weshare.android.presentation.Barter2.MainScreen
 import site.weshare.android.presentation.barter.BarterDetailScreen
 import site.weshare.android.presentation.barter.BarterPostRegister
 import site.weshare.android.presentation.barter.BarterScreen
@@ -135,7 +136,7 @@ fun AppMain(){
             }
             composable("tab3") {
 //                BarterScreen()
-                BarterPostRegister()
+                MainScreen()
 //                BarterDetailScreen(productId = "sample_product_id")
 //                ExchangeProposalScreen()
 
