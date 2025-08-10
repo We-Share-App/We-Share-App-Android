@@ -412,7 +412,7 @@ fun GongguCompleteMainScreen(
 fun GongguHeaderSectionPreview() {
     MaterialTheme {
         GongguHeaderSection(
-            currentLocation = "흑석동",
+            currentLocation = "만리동2가",
             showLocationDialog = false,
             appliedFilters = FilterSettings(
 
