@@ -1,3 +1,5 @@
+//2025 소프트웨어 공모전 팀 까치
+
 package site.weshare.android
 
 import android.os.Bundle
