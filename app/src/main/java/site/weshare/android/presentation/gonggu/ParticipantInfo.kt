@@ -1,4 +1,4 @@
-package com.example.grouppurchase
+package site.weshare.android.presentation.gonggu
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,7 +47,7 @@ fun GroupPurchaseScreen(
     participants: List<Participant> = sampleParticipants(),
     onBackClick: () -> Unit = {},
     onChatClick: (String) -> Unit = {},
-    onCompleteAllClick: () -> Unit = {}
+    onCompleteAllClick: () -> Unit = {} // 🔥 이 콜백으로 다이얼로그 화면 네비게이션 처리
 ) {
     Column(
         modifier = Modifier
@@ -92,7 +92,7 @@ fun GroupPurchaseScreen(
 
         // 공동구매 완료 버튼
         Button(
-            onClick = onCompleteAllClick,
+            onClick = onCompleteAllClick, // 🔥 이 콜백이 다이얼로그 화면으로 네비게이션
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -226,8 +226,6 @@ fun ParticipantItem(
     }
 }
 
-
-
 // 샘플 데이터
 fun sampleParticipants() = listOf(
     Participant(
@@ -266,6 +264,27 @@ fun sampleParticipants() = listOf(
         userType = UserType.SAFE
     )
 )
+
+// ==================== 사용 예시 ====================
+/*
+NavGraph에서 이렇게 사용하세요:
+
+composable("participants") {
+    GroupPurchaseScreen(
+        participants = sampleParticipants(),
+        onBackClick = {
+            navController.popBackStack()
+        },
+        onChatClick = { participantId ->
+            println("Chat with participant: $participantId")
+        },
+        onCompleteAllClick = {
+            // 🔥 다이얼로그 화면으로 네비게이션
+            navController.navigate("dialog")
+        }
+    )
+}
+*/
 
 @Preview(showBackground = true)
 @Composable

@@ -184,12 +184,10 @@ fun GongguItemCard(
             }
         }
 
-        // 더보기 메뉴 컴포넌트 사용
-//        GongguMoreMenu(
-//            onReportClick = { onMenuAction("report") },
-//            onShareClick = { onMenuAction("share") },
-//            onInquiryClick = { onMenuAction("inquiry") }
-//        )
+        // 🔥 더보기 메뉴 컴포넌트 - 주석 해제하고 수정
+        GongguMoreMenu(
+            onMenuAction = onMenuAction
+        )
     }
 }
 

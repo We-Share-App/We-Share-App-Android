@@ -19,17 +19,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// 데이터 클래스
-data class Participant(
-    val name: String,
-    val period: String,
-    val location: String,
-    val description: String,
-    val isOnline: Boolean = false
-)
+// DialogScreen에서는 Participant 데이터 클래스를 사용하지 않으므로 제거
 
 @Composable
-fun DialogScreen() {
+fun DialogScreen(
+    onConfirmClick: () -> Unit = {}, // 🔥 "네" 버튼 클릭 시 콜백
+    onCancelClick: () -> Unit = {}   // 🔥 "아니오" 버튼 클릭 시 콜백
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -68,8 +64,8 @@ fun DialogScreen() {
 
         // 중앙 다이얼로그
         CallDialog(
-            onCallClick = { },
-            onCancelClick = { }
+            onCallClick = onConfirmClick, // 🔥 "네" 버튼 → 네비게이션 처리
+            onCancelClick = onCancelClick // 🔥 "아니오" 버튼 → 네비게이션 처리
         )
     }
 }
@@ -110,7 +106,7 @@ fun CallDialog(
             ) {
                 // 네 버튼
                 Button(
-                    onClick = onCallClick,
+                    onClick = onCallClick, // 🔥 이 버튼을 누르면 네비게이션 처리
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp),
@@ -129,7 +125,7 @@ fun CallDialog(
 
                 // 아니요 버튼
                 Button(
-                    onClick = onCancelClick,
+                    onClick = onCancelClick, // 🔥 이 버튼을 누르면 뒤로가기 처리
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp),
@@ -150,10 +146,50 @@ fun CallDialog(
     }
 }
 
+// ==================== 사용 예시 ====================
+/*
+NavGraph에서 이렇게 사용하세요:
+
+composable("dialog") {
+    DialogScreen(
+        onConfirmClick = {
+            // 🔥 "네" 버튼 클릭 시 → ChatScreen으로 이동
+            navController.navigate("chat")
+        },
+        onCancelClick = {
+            // 🔥 "아니오" 버튼 클릭 시 → 이전 화면으로
+            navController.popBackStack()
+        }
+    )
+}
+
+composable("chat") {
+    ChatScreen(
+        onBackClick = {
+            navController.popBackStack()
+        },
+        onMenuClick = {
+            // 메뉴 클릭 처리
+            println("Menu clicked")
+        },
+        onSendMessage = { message ->
+            // 메시지 전송 처리
+            println("Message sent: $message")
+        }
+    )
+}
+*/
 
 // 프리뷰
 @Preview(showBackground = true)
 @Composable
 fun DialogScreenPreview() {
-    DialogScreen()
+    DialogScreen(
+        onConfirmClick = {
+            println("네 버튼 클릭됨 - 다음 화면으로 이동")
+        },
+        onCancelClick = {
+            println("아니오 버튼 클릭됨 - 이전 화면으로 이동")
+        }
+    )
 }

@@ -313,12 +313,22 @@ fun GongguDetailScreenContainer(
     viewModel: GongguDetailViewModel = remember { GongguDetailViewModel() },
     onBackClick: () -> Unit = {},
     onParticipateClick: (Int) -> Unit = {},
-    onOverQuantityClick: (Int) -> Unit = {} // 수량 초과 시 화면 전환을 위한 콜백
+    onOverQuantityClick: (Int) -> Unit = {},
+    onNavigateToClosedScreen: () -> Unit = {} // 🔥 마감 화면 네비게이션 콜백 추가
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(itemId) {
         viewModel.loadGongguDetail(itemId)
+    }
+
+    // 🔥 아이템이 로드되고 마감된 경우 자동으로 마감 화면으로 이동
+    LaunchedEffect(uiState.item?.isClosed) {
+        uiState.item?.let { item ->
+            if (item.isClosed) {
+                onNavigateToClosedScreen()
+            }
+        }
     }
 
     LaunchedEffect(uiState.participateResult) {
@@ -361,7 +371,7 @@ fun GongguDetailScreenContainer(
                 }
             }
         }
-        uiState.item != null -> {
+        uiState.item != null && !uiState.item!!.isClosed -> { // 🔥 마감되지 않은 경우만 표시
             GongguDetailScreen(
                 item = uiState.item!!,
                 onBackClick = onBackClick,
@@ -370,7 +380,7 @@ fun GongguDetailScreenContainer(
                     println("Heart clicked for item: ${uiState.item!!.id}")
                 },
                 onParticipateClick = onParticipateClick,
-                onOverQuantityClick = onOverQuantityClick, // 콜백 전달
+                onOverQuantityClick = onOverQuantityClick,
                 isLiked = uiState.isLiked
             )
         }
@@ -384,7 +394,7 @@ fun GongguDetailScreen(
     onBackClick: () -> Unit = {},
     onHeartClick: () -> Unit = {},
     onParticipateClick: (Int) -> Unit = {},
-    onOverQuantityClick: (Int) -> Unit = {}, // 수량 초과 시 화면 전환을 위한 콜백
+    onOverQuantityClick: (Int) -> Unit = {},
     isLiked: Boolean = false,
     initialQuantity: Int = 0,
     onReportClick: () -> Unit = {},
@@ -392,6 +402,7 @@ fun GongguDetailScreen(
     onInquiryClick: () -> Unit = {}
 ) {
     var selectedQuantity by remember { mutableStateOf(initialQuantity) }
+    var showOverQuantityDialog by remember { mutableStateOf(false) }
     val overLimit = selectedQuantity > item.remainingQuantity
     val scrollState = rememberScrollState()
 
@@ -763,13 +774,10 @@ fun GongguDetailScreen(
 
                         IconButton(
                             onClick = {
-                                println("현재 수량: $selectedQuantity, 남은 수량: ${item.remainingQuantity}") // 디버그 로그
                                 if (selectedQuantity >= item.remainingQuantity) {
-                                    println("수량 초과 감지! 화면 전환 시도") // 디버그 로그
-                                    onOverQuantityClick(item.remainingQuantity)
+                                    showOverQuantityDialog = true
                                 } else {
                                     selectedQuantity++
-                                    println("수량 증가: $selectedQuantity") // 디버그 로그
                                 }
                             },
                             modifier = Modifier.size(24.dp)
@@ -783,8 +791,8 @@ fun GongguDetailScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         val priceText = item.price.replace(",", "").replace("원", "")
                         val totalPrice = priceText.toIntOrNull() ?: 0
-                        val unitPrice = totalPrice / item.totalQuantity  // 개당 가격
-                        val myTotalPrice = selectedQuantity * unitPrice  // 내가 설정한 개수만큼의 총 가격
+                        val unitPrice = totalPrice / item.totalQuantity
+                        val myTotalPrice = selectedQuantity * unitPrice
 
                         Text(
                             text = "${String.format("%,d", myTotalPrice)}원",
@@ -797,7 +805,6 @@ fun GongguDetailScreen(
 
                     Button(
                         onClick = {
-                            // 정상적인 참여 처리 (수량 체크는 + 버튼에서 이미 처리됨)
                             onParticipateClick(selectedQuantity)
                         },
                         enabled = selectedQuantity > 0 && item.remainingQuantity > 0,
@@ -817,6 +824,18 @@ fun GongguDetailScreen(
                     }
                 }
             }
+        }
+
+        // 수량 초과 다이얼로그
+        if (showOverQuantityDialog) {
+            OverQuantityDialog(
+                remainingQuantity = item.remainingQuantity,
+                onDismiss = { showOverQuantityDialog = false },
+                onConfirm = {
+                    showOverQuantityDialog = false
+                    onOverQuantityClick(item.remainingQuantity)
+                }
+            )
         }
     }
 }
@@ -850,7 +869,6 @@ fun GongguDetailScreenPreview() {
         GongguDetailScreen(
             item = mockItem,
             onOverQuantityClick = { remainingQuantity ->
-                // 수량 초과 시 처리 - 예: Navigation
                 println("수량 초과! 남은 수량: $remainingQuantity")
             }
         )

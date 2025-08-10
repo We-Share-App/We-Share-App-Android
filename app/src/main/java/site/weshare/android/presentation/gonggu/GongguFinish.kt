@@ -55,7 +55,7 @@ fun ClosedGongguScreen(
                 color = Color.White
             ) {
                 Button(
-                    onClick = onCreateChatRoom,
+                    onClick = onCreateChatRoom, // 🔥 이 콜백으로 네비게이션 처리
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 8.dp),
@@ -63,7 +63,7 @@ fun ClosedGongguScreen(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        "공동구매 채팅창 만들기",
+                        "공동구매 채팅방 만들기",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -74,14 +74,43 @@ fun ClosedGongguScreen(
     }
 }
 
+// ==================== 사용 예시 ====================
+/*
+기존 화면에서 이렇게 사용하세요:
+
+ClosedGongguScreen(
+    onCreateChatRoom = {
+        // 🔥 참여자 화면으로 네비게이션
+        navController.navigate("participants")
+    }
+)
+
+그리고 NavGraph에 이 라우트를 추가하세요:
+
+composable("participants") {
+    GroupPurchaseScreen(
+        participants = sampleParticipants(),
+        onBackClick = {
+            navController.popBackStack()
+        },
+        onChatClick = { participantId ->
+            println("Chat with participant: $participantId")
+        },
+        onCompleteAllClick = {
+            println("Group purchase completed")
+        }
+    )
+}
+*/
+
 // ==================== 데모용 화면 ====================
 @Composable
 fun ClosedGongguScreenDemo() {
     // 바로 마감 화면이 보이도록 수정
     ClosedGongguScreen(
         onCreateChatRoom = {
-            // 채팅창 만들기 버튼 클릭 시 처리할 로직
-            println("채팅창 만들기 버튼 클릭됨")
+            // 🔥 실제 사용 시에는 navController.navigate("participants")로 교체
+            println("채팅방 만들기 버튼 클릭됨 - participants 화면으로 이동")
         }
     )
 }

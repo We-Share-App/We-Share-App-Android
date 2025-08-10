@@ -3,6 +3,7 @@ package site.weshare.android.presentation.gonggu
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,7 @@ fun OverQuantityDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(bottom = 24.dp, top = 28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
@@ -56,32 +57,35 @@ fun OverQuantityDialog(
                 Text(
                     text = "재고 부족으로 ${remainingQuantity}개까지\n구매 가능한 상품입니다.\n개수를 다시 선택해주세요.",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
+                    fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                     color = Color.Black,
-                    lineHeight = 22.sp
+                    lineHeight = 20.sp
                 )
 
                 // 확인 버튼
-                Button(
-                    onClick = {
-                        onConfirm()
-                        onDismiss()
-                    },
+                // 구분선
+                Divider(
+                    color = Color.LightGray,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 0.dp)
+                )
+
+// 확인 버튼 영역 (가로선 아래)
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color.LightGray)
+                        .clickable {
+                            onConfirm()
+                            onDismiss()
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "확  인",
+                        text = "확    인",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
+                        color = Color.Black,
                         letterSpacing = 2.sp
                     )
                 }
