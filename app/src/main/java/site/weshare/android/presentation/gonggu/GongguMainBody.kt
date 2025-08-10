@@ -31,10 +31,10 @@ private fun getMockGongguData(): List<GongguItem> = listOf(
     GongguItem(2, "코카콜라 제로 190ml 60개 공동구매해요~","총 구매 개수 : 60개\n남은 개수 : 15개","48,000원",45,60,8,3,6,32, R.drawable.gonggu_cola),
     GongguItem(3, "리벤스 물티슈 대용량","총 구매 개수 : 80개\n남은 개수 : 17개","35,600원",63,80,4,6,10,56, R.drawable.gonggu_tissue),
     GongguItem(4, "신라면 공구해요","총 구매 개수 : 40개\n남은 개수 : 5개","28,800원",35,40,4,9,23,67, R.drawable.gonggu_ramen),
-    GongguItem(5, "자취생 필수품 햇반","총 구매 개수 : 48개\n남은 개수 : 10개","32,400원",38,48,2,7,15,89, R.drawable.gonggu_bab),
-    GongguItem(6, "오뚜기 진라면 매운맛","총 구매 개수 : 36개\n남은 개수 : 12개","19,800원",24,36,6,4,8,28, R.drawable.gonggu_jinramen),
-    GongguItem(7, "봉쥬르끌레어 캡슐세제","총 구매 개수 : 200개\n남은 개수 : 7개","42,000원",13,20,12,2,4,19, R.drawable.gonggu_seje),
-    GongguItem(8, "동원 참치캔","총 구매 개수 : 50개\n남은 개수 : 18개","38,500원",32,50,1,11,26,78, R.drawable.gonggu_dongwon)
+    GongguItem(5, "오뚜기 진라면 매운맛","총 구매 개수 : 36개\n남은 개수 : 12개","19,800원",24,36,6,4,8,28, R.drawable.gonggu_jinramen),
+//    GongguItem(6, "봉쥬르끌레어 캡슐세제","총 구매 개수 : 200개\n남은 개수 : 7개","42,000원",13,20,12,2,4,19, R.drawable.gonggu_seje),
+//    GongguItem(7, "동원 참치캔","총 구매 개수 : 50개\n남은 개수 : 18개","38,500원",32,50,1,11,26,78, R.drawable.gonggu_dongwon),
+    GongguItem(6, "자취생 필수품 햇반","총 구매 개수 : 48개\n남은 개수 : 10개","32,400원",38,48,2,7,15,89, R.drawable.gonggu_bab)
 )
 
 // ==================== Product List Body (상품 리스트만) ====================

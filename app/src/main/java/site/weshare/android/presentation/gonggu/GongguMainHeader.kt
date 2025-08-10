@@ -144,7 +144,7 @@ data class GongguUiState(
     val items: List<GongguItem> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val currentLocation: String = "흑석동",
+    val currentLocation: String = "만리동2가",
     val selectedFilter: FilterType = FilterType.ALL,
     val sortBy: SortType = SortType.LATEST,
     val totalCount: Int = 0,
@@ -248,7 +248,7 @@ class GongguViewModel(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GongguHeaderSection(
-    currentLocation: String = "흑석동",
+    currentLocation: String = "만리동2가",
     showLocationDialog: Boolean = false,
     appliedFilters: FilterSettings = FilterSettings(),
     onLocationClick: () -> Unit = {},

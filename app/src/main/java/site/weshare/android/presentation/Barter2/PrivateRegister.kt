@@ -31,13 +31,17 @@ import site.weshare.android.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen() {
+fun RegistrationScreen(
+    onCloseClick: () -> Unit = {},
+    onSubmitClick: () -> Unit = {}
+) {
     var productName by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("") }
     var selectedCondition by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf(0) }
     var quantityCount by remember { mutableStateOf("0") }
+
 
     Column(
         modifier = Modifier
@@ -60,7 +64,7 @@ fun RegistrationScreen() {
                 tint = Color.Black,
                 modifier = Modifier
                     .size(24.dp)
-                    .clickable { /* 닫기 로직 */ }
+                    .clickable { onCloseClick() }   // ✅ 닫기 콜백 호출
             )
         }
 
@@ -362,7 +366,7 @@ fun RegistrationScreen() {
 
         // 등록 버튼
         Button(
-            onClick = { },
+            onClick = { onSubmitClick() },           // ✅ 등록/완료 콜백 호출
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
