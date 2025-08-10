@@ -17,11 +17,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import site.weshare.android.presentation.gonggu.GongguRepository
 import site.weshare.android.presentation.gonggu.GongguViewModel
 import site.weshare.android.presentation.gonggu.FilterSettings
+import site.weshare.android.presentation.productdetail.ProductDetailScreen
 
 /**
  * 메인 화면 - 헤더와 바디를 분리해서 호출하고 오버레이 다이얼로그 표시
@@ -37,12 +40,58 @@ fun MainScreen(
     onFilterClick: () -> Unit = {},
     onLocationClick: () -> Unit = {}
 ) {
-    var showFilterDialog by remember { mutableStateOf(false) }
-    var showLocationDialog by remember { mutableStateOf(false) }
-    var showRegisterOverlay by remember { mutableStateOf(false) }
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    NavHost(
+        navController = navController,
+        startDestination = "main"
+    ) {
+        composable("main") {
+            MainScreenContent(
+                onItemClick = { item ->
+                    navController.navigate("product_detail/${item.id}")
+                },
+                onSearchClick = onSearchClick,
+                onFavoriteClick = onFavoriteClick,
+                onNotificationClick = onNotificationClick,
+                onRegisterClick = onRegisterClick,
+                onMenuAction = onMenuAction,
+                onFilterClick = onFilterClick,
+                onLocationClick = onLocationClick
+            )
+        }
+
+        composable("product_detail/{productId}") { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull() ?: 1
+            ProductDetailScreen(
+                productId = productId,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onExchangeClick = {
+                    println("교환 요청 - Product ID: $productId")
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun MainScreenContent(
+    onItemClick: (GongguItem) -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onFavoriteClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {},
+    onRegisterClick: () -> Unit = {},
+    onMenuAction: (GongguItem, String) -> Unit = { _, _ -> },
+    onFilterClick: () -> Unit = {},
+    onLocationClick: () -> Unit = {}
+) {
+    var showFilterDialog by remember { mutableStateOf(false) }
+    var showLocationDialog by remember { mutableStateOf(false) }
+    var showRegisterOverlay by remember { mutableStateOf(false) }
     val headerViewModel = remember {
         GongguViewModel(
             repository = GongguRepository(

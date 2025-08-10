@@ -30,11 +30,11 @@ import androidx.compose.ui.unit.sp
 // ==================== Mock Data ====================
 private fun getMockGongguData(): List<GongguItem> = listOf(
     GongguItem(1, "롯데자이언츠 동백 유니폼 어센틱", "상품 상태 : 사용감 없음\n희망 카테고리 : 스포츠, 의류", "25,920원",16,24,1,5,13,43, R.drawable.busan),
-    GongguItem(2, "프리미에 디칼시파잉 방 케라스타즈 샴푸 3개","상품 상태 : 사용감 없음\n희망 카테고리 : 뷰티/미용, 도서/티켓/음반","48,000원",45,60,1,3,6,32, R.drawable.shampoo),
-    GongguItem(3, "레노버 게이밍 노트북 Legion 5 15arh6","상품 상태 : 사용감 없음\n희망 카테고리 : 디지털기기, 게임","35,600원",63,80,2,6,10,56, R.drawable.gamebook),
-    GongguItem(4, "태그호이어 링크 청판 CBC2112","상품 상태 : 사용감 없음\n희망 카테고리 : 의류, 디지털기기","28,800원",35,40,2,9,23,67, R.drawable.watch),
-    GongguItem(5, "(신상) 폴로 슬림핏 린넨셔츠 L","상품 상태 : 새 상품\n희망 카테고리 : 의류","32,400원",38,48,2,7,15,89, R.drawable.polo),
-    GongguItem(6, "가면라이더 리바이스 데몬즈 세트","상품 상태 : 사용감 없음\n희망 카테고리 : 피규어/인형, 디지털기기","19,800원",24,36,3,4,8,28, R.drawable.rkausfkdlej)
+    GongguItem(2, "프리미에 디칼시파잉 방 케라스타즈 샴푸 3개","상품 상태 : 사용감 없음\n희망 카테고리 : 뷰티/미용, 도서/티켓/음반","48,000원",45,60,4,3,6,32, R.drawable.shampoo),
+    GongguItem(3, "레노버 게이밍 노트북 Legion 5 15arh6","상품 상태 : 사용감 없음\n희망 카테고리 : 디지털기기, 게임","35,600원",63,80,8,6,10,56, R.drawable.gamebook),
+    GongguItem(4, "태그호이어 링크 청판 CBC2112","상품 상태 : 사용감 없음\n희망 카테고리 : 의류, 디지털기기","28,800원",35,40,12,9,23,67, R.drawable.watch),
+    GongguItem(5, "(신상) 폴로 슬림핏 린넨셔츠 L","상품 상태 : 새 상품\n희망 카테고리 : 의류","32,400원",38,48,20,7,15,89, R.drawable.polo),
+    GongguItem(6, "가면라이더 리바이스 데몬즈 세트","상품 상태 : 사용감 없음\n희망 카테고리 : 피규어/인형, 디지털기기","19,800원",24,36,24,4,8,28, R.drawable.rkausfkdlej)
 )
 
 // ==================== Product List Body (상품 리스트만) ====================
@@ -162,9 +162,9 @@ fun GongguItemCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("${item.daysLeft}주전", fontSize = 12.sp,
+                Text("${item.daysLeft}시간전", fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (item.daysLeft <= 1) Color.Red else Color.Gray
+                    color = if (item.daysLeft <= 6) Color.Red else Color.Gray
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
