@@ -30,8 +30,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import site.weshare.android.R
-import site.weshare.android.presentation.Barter2.MainScreen
+import site.weshare.android.presentation.Barter2.TradeSelectionScreen
+import site.weshare.android.presentation.Barter2.ProductDetailScreen as ConfirmationScreen
 import site.weshare.android.presentation.gonggu.GongguItem
 
 // 물품교환 상세 데이터 모델
@@ -72,7 +76,7 @@ fun GongguItem.toProductDetail(): ProductDetailItem {
         title = this.title,
         category = "스포츠, 레저", // 기본값
         location = "서울시 중랑구", // 기본값
-        timeAgo = "${this.daysLeft}일 전",
+        timeAgo = "${this.daysLeft}시간전",
         description = this.description,
         imageRes = this.imageRes,
         isLiked = false,
@@ -114,7 +118,6 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
             viewCount = 43,
             likeCount = 5,
             chatCount = 13,
-            // ✅ 1번에는 관련이미지 있음
             relatedImages = listOf(
                 R.drawable.dpfwl,
                 R.drawable.dpfwl2,
@@ -160,7 +163,6 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
             viewCount = 56,
             likeCount = 6,
             chatCount = 10,
-            // ✅ 3번에는 관련이미지 있음
             relatedImages = listOf(
                 R.drawable.rlxk,
                 R.drawable.zlqhem,
@@ -171,66 +173,6 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
                 ExchangeOption(1, "데스크탑", "게이밍 데스크탑으로 교환", R.drawable.gamebook),
                 ExchangeOption(2, "태블릿", "아이패드나 갤탭", R.drawable.watch),
                 ExchangeOption(3, "모니터", "게이밍 모니터", R.drawable.polo)
-            ),
-            sellerProducts = commonSellerProducts
-        )
-        4 -> ProductDetailItem(
-            id = 4,
-            title = "태그호이어 링크 청판 CBC2112",
-            category = "패션/의류",
-            location = "서울시 마포구",
-            timeAgo = "2일 전",
-            description = "정품이고 구매한지 1년 정도 됐어요\n스크래치 거의 없는 깔끔한 상태입니다",
-            imageRes = R.drawable.watch,
-            isLiked = false,
-            viewCount = 67,
-            likeCount = 9,
-            chatCount = 23,
-            relatedImages = listOf(R.drawable.watch, R.drawable.polo, R.drawable.rkausfkdlej, R.drawable.busan),
-            exchangeOptions = listOf(
-                ExchangeOption(1, "명품시계", "다른 브랜드 시계", R.drawable.watch),
-                ExchangeOption(2, "액세서리", "명품 액세서리", R.drawable.polo),
-                ExchangeOption(3, "전자제품", "고가 전자제품", R.drawable.gamebook)
-            ),
-            sellerProducts = commonSellerProducts
-        )
-        5 -> ProductDetailItem(
-            id = 5,
-            title = "(신상) 폴로 슬림핏 린넨셔츠 L",
-            category = "패션/의류",
-            location = "서울시 용산구",
-            timeAgo = "2일 전",
-            description = "새 상품이고 택 달린 상태입니다\n사이즈가 안 맞아서 교환하려고 해요",
-            imageRes = R.drawable.polo,
-            isLiked = false,
-            viewCount = 89,
-            likeCount = 7,
-            chatCount = 15,
-            relatedImages = listOf(R.drawable.polo, R.drawable.rkausfkdlej, R.drawable.busan, R.drawable.shampoo),
-            exchangeOptions = listOf(
-                ExchangeOption(1, "의류", "같은 브랜드 M사이즈", R.drawable.polo),
-                ExchangeOption(2, "캐주얼", "다른 캐주얼 의류", R.drawable.rkausfkdlej),
-                ExchangeOption(3, "액세서리", "패션 액세서리", R.drawable.watch)
-            ),
-            sellerProducts = commonSellerProducts
-        )
-        6 -> ProductDetailItem(
-            id = 6,
-            title = "가면라이더 리바이스 데몬즈 세트",
-            category = "취미/수집",
-            location = "서울시 노원구",
-            timeAgo = "3일 전",
-            description = "피규어 상태 좋고 박스도 있어요\n취미 바뀌어서 정리하려고 합니다",
-            imageRes = R.drawable.rkausfkdlej,
-            isLiked = false,
-            viewCount = 28,
-            likeCount = 4,
-            chatCount = 8,
-            relatedImages = listOf(R.drawable.rkausfkdlej, R.drawable.busan, R.drawable.shampoo, R.drawable.gamebook),
-            exchangeOptions = listOf(
-                ExchangeOption(1, "피규어", "다른 시리즈 피규어", R.drawable.rkausfkdlej),
-                ExchangeOption(2, "게임", "닌텐도 게임", R.drawable.gamebook),
-                ExchangeOption(3, "만화책", "관련 만화책이나 소설", R.drawable.polo)
             ),
             sellerProducts = commonSellerProducts
         )
@@ -250,6 +192,49 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
             exchangeOptions = emptyList(),
             sellerProducts = emptyList()
         )
+    }
+}
+
+// 메인 네비게이션 컴포넌트 (수정됨)
+@Composable
+fun ProductDetailNavigation(
+    productId: Int = 1,
+    onBackToMain: () -> Unit = {}
+) {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "product_detail"
+    ) {
+        composable("product_detail") {
+            ProductDetailScreen(
+                productId = productId,
+                onBackClick = onBackToMain,
+                onExchangeClick = {
+                    navController.navigate("trade_selection")
+                }
+            )
+        }
+
+        composable("trade_selection") {
+            TradeSelectionScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onSelectionComplete = {
+                    navController.navigate("confirmation_screen")
+                }
+            )
+        }
+
+        composable("confirmation_screen") {
+            ConfirmationScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }
 
@@ -536,15 +521,11 @@ fun ProductDetailScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
                 }
-
-                // 판매자 정보와 물건 그리드
-
-                }
-                Spacer(modifier = Modifier.height(100.dp)) // 하단 바 여백
             }
+            Spacer(modifier = Modifier.height(100.dp)) // 하단 바 여백
         }
     }
-
+}
 
 @Composable
 fun SellerProductItem(
@@ -639,56 +620,11 @@ fun ExchangeOptionItem(
     }
 }
 
-// MainScreen과 연결하기 위한 통합 컴포넌트
-@Composable
-fun ProductDetailContainer(
-    productId: Int,
-    onBackClick: () -> Unit = {},
-    onExchangeClick: () -> Unit = {}
-) {
-    ProductDetailScreen(
-        productId = productId,
-        onBackClick = onBackClick,
-        onExchangeClick = onExchangeClick
-    )
-}
-
-// MainScreen에서 사용할 수 있도록 상품 리스트와 상세 화면을 관리하는 컴포넌트
-@Composable
-fun MainScreenWithDetail(
-    initialProductId: Int? = null,
-    onNavigateBack: () -> Unit = {}
-) {
-    var currentProductId by remember { mutableStateOf<Int?>(initialProductId) }
-
-    if (currentProductId != null) {
-        // 상품 상세 화면 표시
-        ProductDetailContainer(
-            productId = currentProductId!!,
-            onBackClick = {
-                currentProductId = null
-                onNavigateBack()
-            },
-            onExchangeClick = {
-                // 교환 요청 로직
-                println("교환 요청 - Product ID: $currentProductId")
-            }
-        )
-    } else {
-        // 메인 화면 표시 (기존 MainScreen 호출)
-        MainScreen(
-            onItemClick = { item ->
-                currentProductId = item.id
-            }
-        )
-    }
-}
-
 // Preview
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ProductDetailScreenPreview() {
+fun ProductDetailNavigationPreview() {
     MaterialTheme {
-        ProductDetailScreen(productId = 1)
+        ProductDetailNavigation()
     }
 }

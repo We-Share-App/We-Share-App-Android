@@ -40,29 +40,31 @@ data class RecommendedItem(
     val imageRes: Int = android.R.drawable.ic_menu_gallery // 더미 이미지
 )
 
+// 네비게이션 제거하고 독립적인 화면으로 사용
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductDetailScreen() {
-    // 이 부분을 찾으세요
+fun ProductDetailScreen(
+    onBackClick: () -> Unit = {},  // 네비게이션 콜백 유지
+    onConfirmClick: () -> Unit = {}  // 확인 버튼 콜백 추가
+) {
     val recommendedItems = listOf(
         RecommendedItem(
             title = "엘지트윈스 검니폼",
             location = "[희망 카테고리]",
             price = " 스포츠, 의류",
-            imageRes = R.drawable.dpfwl // ← 여기를 본인 이미지로 변경
+            imageRes = R.drawable.dpfwl
         ),
         RecommendedItem(
             title = "정품) LG트윈스 야구",
             location = "[희망 카테고리]",
             price = "스포츠, 의류",
-            imageRes = R.drawable.dpfwl2 // ← 여기를 본인 이미지로 변경
+            imageRes = R.drawable.dpfwl2
         ),
         RecommendedItem(
             title = "귀멸의 칼날 만화책",
             location = "[희망 카테고리]",
             price = " 도서/티켓/음반",
             imageRes = R.drawable.rnlzkf
-        // ← 여기를 본인 이미지로 변경
         )
     )
 
@@ -71,7 +73,7 @@ fun ProductDetailScreen() {
             TopAppBar(
                 title = { Text("") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBackClick) { // 콜백 연결
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "뒤로가기"
@@ -95,7 +97,10 @@ fun ProductDetailScreen() {
             Column {
                 // 확인 버튼
                 Button(
-                    onClick = { },
+                    onClick = {
+                        // 확인 버튼 클릭 시 메인화면으로 이동
+                        onConfirmClick()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
@@ -114,7 +119,6 @@ fun ProductDetailScreen() {
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-
             }
         }
     ) { paddingValues ->
@@ -152,7 +156,6 @@ fun ProductDetailScreen() {
                     modifier = Modifier.size(400.dp),
                     contentScale = ContentScale.Crop
                 )
-                // 여기에 실제 Busan 유니폼 이미지가 들어갈 예정
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -242,7 +245,6 @@ fun RecommendedItemCard(item: RecommendedItem) {
         )
     }
 }
-
 
 data class BottomNavItem(
     val label: String,
