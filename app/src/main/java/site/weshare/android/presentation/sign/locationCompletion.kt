@@ -108,6 +108,6 @@ fun CompletionScreen(
 @Composable
 fun CompletionScreenPreview() {
     MaterialTheme {
-        CompletionScreen(userName = "홍길동")
+        CompletionScreen(userName = "kachi")
     }
 }
