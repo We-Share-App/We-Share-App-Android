@@ -80,8 +80,8 @@ class LocationRepository(
     }
 
     private fun getMockLocations(): List<Location> = listOf(
-        Location(id = 1, name = "흑석동", isSelected = true),
-        Location(id = 2, name = "이태원2동", isSelected = false)
+        Location(id = 1, name = "만리동2가", isSelected = true),
+        Location(id = 2, name = "표선면", isSelected = false)
     )
 }
 
