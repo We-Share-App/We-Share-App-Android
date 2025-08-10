@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,9 +36,11 @@ data class TradeItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TradeSelectionScreen() {
+fun TradeSelectionScreen(
+    onBackClick: () -> Unit = {},
+    onSelectionComplete: () -> Unit = {}
+) {
     val selectedItems = remember { mutableStateListOf<Int>() }
-
     val dummyItems = getDummyItems()
 
     Scaffold(
@@ -48,7 +48,7 @@ fun TradeSelectionScreen() {
             TopAppBar(
                 title = { },
                 navigationIcon = {
-                    IconButton(onClick = { /* 뒤로가기 */ }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "뒤로가기",
@@ -75,7 +75,11 @@ fun TradeSelectionScreen() {
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
 
                 Button(
-                    onClick = { /* 선택 완료 */ },
+                    onClick = {
+                        if (selectedItems.isNotEmpty()) {
+                            onSelectionComplete()
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
@@ -93,9 +97,6 @@ fun TradeSelectionScreen() {
                         color = Color.White
                     )
                 }
-
-                // 하단 네비게이션
-
             }
         },
         containerColor = Color.White
@@ -116,12 +117,7 @@ fun TradeSelectionScreen() {
                     color = Color.Black,
                     lineHeight = 30.sp
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
 
-                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(top = 8.dp)
@@ -194,7 +190,7 @@ fun TradeItemCard(
         Column(
             modifier = Modifier.padding(12.dp)
         ) {
-            // 이미지 플레이스홀더
+            // 이미지
             Image(
                 painter = painterResource(id = item.imageRes),
                 contentDescription = item.name,
@@ -231,6 +227,13 @@ fun TradeItemCard(
     }
 }
 
+private fun getDummyItems() = listOf(
+    TradeItem(1, "엘지트윈스 검니폼", "의류 카테고리", "스포츠, 의류", R.drawable.dpfwl),
+    TradeItem(2, "정품) LG트윈스 유니폼", "의류 카테고리", "스포츠, 의류", R.drawable.dpfwl2),
+    TradeItem(3, "Jackson (잭슨) 일렉기", "악기 카테고리", "디지털기기", R.drawable.rlxk),
+    TradeItem(4, "F87 pro 다크그레이 키", "디지털 카테고리", "디지털기기", R.drawable.zlqhem),
+    TradeItem(5, "귀멸의 칼날 만화책", "의류 카테고리", "도서/취미/완구", R.drawable.rnlzkf)
+)
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -239,11 +242,3 @@ fun TradeSelectionScreenPreview() {
         TradeSelectionScreen()
     }
 }
-
-private fun getDummyItems() = listOf(
-    TradeItem(1, "엘지트윈스 검니폼", "의류 카테고리", "스포츠, 의류", R.drawable.dpfwl),
-    TradeItem(2, "정품) LG트윈스 유니폼", "의류 카테고리", "스포츠, 의류", R.drawable.dpfwl2),
-    TradeItem(3, "Jackson (잭슨) 일렉기", "악기 카테고리", "디지털기기", R.drawable.rlxk),
-    TradeItem(4, "F87 pro 다크그레이 키", "디지털 카테고리", "디지털기기", R.drawable.zlqhem),
-    TradeItem(5, "귀멸의 칼날 만화책", "의류 카테고리", "도서/취미/완구", R.drawable.rnlzkf)
-)
