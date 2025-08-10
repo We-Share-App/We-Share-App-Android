@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,7 +53,8 @@ data class ProductDetailItem(
     val likeCount: Int = 0,
     val chatCount: Int = 0,
     val relatedImages: List<Int> = emptyList(),
-    val exchangeOptions: List<ExchangeOption> = emptyList()
+    val exchangeOptions: List<ExchangeOption> = emptyList(),
+    val sellerProducts: List<SellerProduct> = emptyList()
 )
 
 data class ExchangeOption(
@@ -57,6 +62,12 @@ data class ExchangeOption(
     val name: String,
     val description: String,
     val imageRes: Int? = null
+)
+
+data class SellerProduct(
+    val id: Int,
+    val title: String,
+    val imageRes: Int
 )
 
 // GongguItem을 ProductDetailItem으로 변환
@@ -86,6 +97,15 @@ fun GongguItem.toProductDetail(): ProductDetailItem {
 
 // Mock 데이터 함수
 private fun getMockProductDetailData(productId: Int): ProductDetailItem {
+    val commonSellerProducts = listOf(
+        SellerProduct(1, "엔젤리오스 컵", R.drawable.busan),
+        SellerProduct(2, "정품 LG트윈스", R.drawable.shampoo),
+        SellerProduct(3, "(새상품) 스탠", R.drawable.gamebook),
+        SellerProduct(4, "롯데자이언츠 옴", R.drawable.watch),
+        SellerProduct(5, "사용자 1", R.drawable.polo),
+        SellerProduct(6, "롯데자이언츠 옴", R.drawable.rkausfkdlej)
+    )
+
     return when (productId) {
         1 -> ProductDetailItem(
             id = 1,
@@ -99,12 +119,19 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
             viewCount = 43,
             likeCount = 5,
             chatCount = 13,
-            relatedImages = listOf(R.drawable.busan, R.drawable.shampoo, R.drawable.gamebook, R.drawable.watch),
+            // ✅ 1번에는 관련이미지 있음
+            relatedImages = listOf(
+                R.drawable.dpfwl,
+                R.drawable.dpfwl2,
+                R.drawable.rnlzkf,
+                R.drawable.rldk
+            ),
             exchangeOptions = listOf(
                 ExchangeOption(1, "축구용품", "축구화이드로 등등 유니폼 어센틱", R.drawable.busan),
                 ExchangeOption(2, "서울시1", "축구화이드로등등", R.drawable.shampoo),
                 ExchangeOption(3, "서울시2", "축구화는텍", R.drawable.gamebook)
-            )
+            ),
+            sellerProducts = commonSellerProducts
         )
         2 -> ProductDetailItem(
             id = 2,
@@ -123,7 +150,8 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
                 ExchangeOption(1, "헤어케어", "다른 브랜드 샴푸도 괜찮아요", R.drawable.shampoo),
                 ExchangeOption(2, "뷰티용품", "스킨케어 제품", R.drawable.gamebook),
                 ExchangeOption(3, "생활용품", "기타 생활용품", R.drawable.watch)
-            )
+            ),
+            sellerProducts = commonSellerProducts
         )
         3 -> ProductDetailItem(
             id = 3,
@@ -137,12 +165,19 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
             viewCount = 56,
             likeCount = 6,
             chatCount = 10,
-            relatedImages = listOf(R.drawable.gamebook, R.drawable.watch, R.drawable.polo, R.drawable.rkausfkdlej),
+            // ✅ 3번에는 관련이미지 있음
+            relatedImages = listOf(
+                R.drawable.rlxk,
+                R.drawable.zlqhem,
+                R.drawable.polo,
+                R.drawable.rkausfkdlej
+            ),
             exchangeOptions = listOf(
                 ExchangeOption(1, "데스크탑", "게이밍 데스크탑으로 교환", R.drawable.gamebook),
                 ExchangeOption(2, "태블릿", "아이패드나 갤탭", R.drawable.watch),
                 ExchangeOption(3, "모니터", "게이밍 모니터", R.drawable.polo)
-            )
+            ),
+            sellerProducts = commonSellerProducts
         )
         4 -> ProductDetailItem(
             id = 4,
@@ -161,7 +196,8 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
                 ExchangeOption(1, "명품시계", "다른 브랜드 시계", R.drawable.watch),
                 ExchangeOption(2, "액세서리", "명품 액세서리", R.drawable.polo),
                 ExchangeOption(3, "전자제품", "고가 전자제품", R.drawable.gamebook)
-            )
+            ),
+            sellerProducts = commonSellerProducts
         )
         5 -> ProductDetailItem(
             id = 5,
@@ -180,7 +216,8 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
                 ExchangeOption(1, "의류", "같은 브랜드 M사이즈", R.drawable.polo),
                 ExchangeOption(2, "캐주얼", "다른 캐주얼 의류", R.drawable.rkausfkdlej),
                 ExchangeOption(3, "액세서리", "패션 액세서리", R.drawable.watch)
-            )
+            ),
+            sellerProducts = commonSellerProducts
         )
         6 -> ProductDetailItem(
             id = 6,
@@ -199,7 +236,8 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
                 ExchangeOption(1, "피규어", "다른 시리즈 피규어", R.drawable.rkausfkdlej),
                 ExchangeOption(2, "게임", "닌텐도 게임", R.drawable.gamebook),
                 ExchangeOption(3, "만화책", "관련 만화책이나 소설", R.drawable.polo)
-            )
+            ),
+            sellerProducts = commonSellerProducts
         )
         else -> ProductDetailItem(
             id = productId,
@@ -214,7 +252,8 @@ private fun getMockProductDetailData(productId: Int): ProductDetailItem {
             likeCount = 0,
             chatCount = 0,
             relatedImages = emptyList(),
-            exchangeOptions = emptyList()
+            exchangeOptions = emptyList(),
+            sellerProducts = emptyList()
         )
     }
 }
@@ -299,7 +338,7 @@ fun ProductDetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(350.dp)
                     .background(Color.Gray.copy(alpha = 0.2f))
             ) {
                 product.imageRes?.let {
@@ -317,24 +356,6 @@ fun ProductDetailScreen(
                         "상품 이미지",
                         color = Color.Gray,
                         fontSize = 16.sp
-                    )
-                }
-
-                // 페이지 인디케이터
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp)
-                        .background(
-                            Color.Black.copy(alpha = 0.5f),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        "1/5",
-                        color = Color.White,
-                        fontSize = 12.sp
                     )
                 }
             }
@@ -410,7 +431,7 @@ fun ProductDetailScreen(
                             fontSize = 15.sp,
                             color = Color(0xff787878),
                             fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.width(110.dp)  // 80.dp에서 100.dp로 변경
+                            modifier = Modifier.width(110.dp)
                         )
 
                         Text(
@@ -521,66 +542,50 @@ fun ProductDetailScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                // 판매자 정보
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = "프로필",
-                            modifier = Modifier.size(24.dp),
-                            tint = Color.White
-                        )
-                    }
+                // 판매자 정보와 물건 그리드
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "홍길동",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "서울시 중랑구",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                    }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // 교환 옵션들
-                Text(
-                    text = "교환 희망 목록",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                product.exchangeOptions.forEach { option ->
-                    ExchangeOptionItem(
-                        option = option,
-                        onClick = { /* 교환 옵션 클릭 처리 */ }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
                 Spacer(modifier = Modifier.height(100.dp)) // 하단 바 여백
             }
         }
+    }
+
+
+@Composable
+fun SellerProductItem(
+    product: SellerProduct,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clickable { onClick() }
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.Gray.copy(alpha = 0.2f))
+        ) {
+            Image(
+                painter = painterResource(id = product.imageRes),
+                contentDescription = product.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = product.title,
+            fontSize = 10.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            lineHeight = 12.sp
+        )
     }
 }
 
