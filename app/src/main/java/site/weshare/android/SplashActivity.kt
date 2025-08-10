@@ -29,6 +29,7 @@ import site.weshare.android.presentation.sign.login.NaverLoginWebViewScreen
 import site.weshare.android.presentation.sign.CompletionScreen
 import site.weshare.android.presentation.sign.CategorySelectionScreen
 import site.weshare.android.presentation.sign.SettingCompletionScreen
+import site.weshare.android.presentation.sign.TermsAgreementScreen
 import site.weshare.android.presentation.splash.SplashScreen
 import site.weshare.android.ui.theme.KachiAndroidTheme
 
@@ -156,7 +157,7 @@ class SplashActivity : ComponentActivity() {
                         // 3. 첫 번째 완료 화면 (지역 설정 완료)
                         composable("completion") {
                             CompletionScreen(
-                                userName = "사용자명", // 실제로는 저장된 닉네임을 가져와야 함
+                                userName = "kachi", // 실제로는 저장된 닉네임을 가져와야 함
                                 onBackClick = {
                                     navController.popBackStack()
                                 },
@@ -169,25 +170,55 @@ class SplashActivity : ComponentActivity() {
                             )
                         }
 
+//                        // 4. 카테고리 선택 화면
+//                        composable("category_selection") {
+//                            CategorySelectionScreen(
+//                                onBackClick = {
+//                                    navController.popBackStack()
+//                                },
+//                                onConfirmClick = {
+//                                    // 설정 완료 화면으로 이동
+//                                    navController.navigate("setting_completion") {
+//                                        popUpTo("completion") { inclusive = true }
+//                                    }
+//                                }
+//                            )
+//                        }
+
+
                         // 4. 카테고리 선택 화면
                         composable("category_selection") {
                             CategorySelectionScreen(
-                                onBackClick = {
-                                    navController.popBackStack()
-                                },
+                                onBackClick = { navController.popBackStack() },
                                 onConfirmClick = {
-                                    // 설정 완료 화면으로 이동
-                                    navController.navigate("setting_completion") {
-                                        popUpTo("completion") { inclusive = true }
+                                    // ✅ 약관 동의 화면으로 이동
+                                    navController.navigate("terms_agreement") {
+                                        popUpTo("completion") { inclusive = false } // 필요시 조정
                                     }
                                 }
                             )
                         }
 
+                        // ✅ 4.5 약관 동의 화면 (신규 추가)
+                        composable("terms_agreement") {
+                            TermsAgreementScreen(
+                                onBackClick = { navController.popBackStack() },
+                                onConfirmClick = {
+                                    // 약관 동의 완료 → 최종 완료 화면으로 이동
+                                    navController.navigate("setting_completion") {
+                                        // 카테고리 선택~약관 스택을 정리하고 싶다면:
+                                        popUpTo("category_selection") { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+
+
+
                         // 5. 최종 완료 화면 (모든 설정 완료)
                         composable("setting_completion") {
                             SettingCompletionScreen(
-                                userName = "사용자명", // 실제로는 저장된 닉네임을 가져와야 함
+                                userName = "kachi", // 실제로는 저장된 닉네임을 가져와야 함
                                 onBackClick = {
                                     navController.popBackStack()
                                 },
