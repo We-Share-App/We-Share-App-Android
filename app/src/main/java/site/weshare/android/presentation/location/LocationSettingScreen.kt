@@ -34,11 +34,11 @@ import kotlinx.coroutines.launch
 import site.weshare.android.R
 import site.weshare.android.data.remote.model.UserLocationRequest
 import site.weshare.android.util.getAccessToken
-import java.util.*
-import jxl.Workbook
+import site.weshare.android.data.remote.api.ApiClient
 import site.weshare.android.util.saveRepresentativeLocationId
 import site.weshare.android.util.saveSecondaryLocationId
-import site.weshare.android.data.remote.api.ApiClient
+import java.util.*
+import jxl.Workbook
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 

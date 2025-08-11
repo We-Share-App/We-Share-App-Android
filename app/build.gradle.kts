@@ -66,7 +66,8 @@ dependencies {
     //네이버 지도 api
     implementation("com.naver.maps:map-sdk:3.22.1")
     //jxl 엑셀 변환
-    implementation("net.sourceforge.jexcelapi:jxl:2.6.12")
+    implementation("org.apache.poi:poi:5.2.3")
+    implementation("org.apache.poi:poi-ooxml:5.2.3")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
