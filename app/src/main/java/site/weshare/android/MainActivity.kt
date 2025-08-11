@@ -284,7 +284,24 @@ fun AppMain() {
             startDestination = navItems.first().route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable("tab1") { HomeScreen() }
+            composable("tab1") {
+                HomeScreen(
+                    onMoreGonggu = {
+                        navController.navigate("tab2") {
+                            popUpTo("tab2") { inclusive = false }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onMoreExchange = {
+                        navController.navigate("tab3") {
+                            popUpTo("tab3") { inclusive = false }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
 //            composable("tab2") { GongguMainScreen() }
             // ✅ tab2에서 등록 화면으로 이동 콜백 전달
             composable("tab2") {

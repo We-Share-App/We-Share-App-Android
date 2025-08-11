@@ -1,3 +1,5 @@
+package site.weshare.android.data.remote.api
+
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
@@ -45,4 +47,5 @@ private const val BASE_URL = "https://we-share.site/"
 
     val userLocationApi: UserLocationApi = retrofit.create(UserLocationApi::class.java)
     val exchangeApi: ExchangeApi = retrofit.create(ExchangeApi::class.java)
+    val groupPurchaseApi: GroupPurchaseApi = retrofit.create(GroupPurchaseApi::class.java)
 }

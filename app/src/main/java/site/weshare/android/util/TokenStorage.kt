@@ -30,3 +30,26 @@ fun getSelectedRegions(context: Context): List<String> {
     return regionsString?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
 }
 
+// Add: persist representative/secondary location IDs from server
+fun saveRepresentativeLocationId(context: Context, locationId: Long) {
+    context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        .edit { putLong("representativeLocationId", locationId) }
+}
+
+fun getRepresentativeLocationId(context: Context): Long? {
+    val value = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        .getLong("representativeLocationId", -1L)
+    return if (value == -1L) null else value
+}
+
+fun saveSecondaryLocationId(context: Context, locationId: Long) {
+    context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        .edit { putLong("secondaryLocationId", locationId) }
+}
+
+fun getSecondaryLocationId(context: Context): Long? {
+    val value = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        .getLong("secondaryLocationId", -1L)
+    return if (value == -1L) null else value
+}
+
