@@ -47,4 +47,5 @@ private const val BASE_URL = "https://we-share.site/"
 
     val userLocationApi: UserLocationApi = retrofit.create(UserLocationApi::class.java)
     val exchangeApi: ExchangeApi = retrofit.create(ExchangeApi::class.java)
+    val groupPurchaseApi: GroupPurchaseApi = retrofit.create(GroupPurchaseApi::class.java)
 }

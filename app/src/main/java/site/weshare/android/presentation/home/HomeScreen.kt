@@ -43,16 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import coil.compose.rememberAsyncImagePainter
-import site.weshare.android.util.getAccessToken
-import site.weshare.android.util.getSelectedRegions
-import site.weshare.android.model.ExchangePostDto
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalContext
-
-//import com.google.accompanist.pager.HorizontalPagerIndicator
-import kotlinx.coroutines.delay
-import site.weshare.android.R
+import site.weshare.android.data.ExchangeRepository
 import site.weshare.android.data.MockData
 import site.weshare.android.model.ExchangeProduct
 import site.weshare.android.model.GroupPurchaseProduct
@@ -70,27 +61,8 @@ import site.weshare.android.util.getRepresentativeLocationId
 import site.weshare.android.util.getSecondaryLocationId
 import site.weshare.android.data.remote.api.ApiClient
 
-fun ExchangePostDto.toExchangeProduct(): ExchangeProduct {
-    return ExchangeProduct(
-        id = this.id.toString(),
-        imageUrl = this.imageUrlList.firstOrNull() ?: "", // 첫 번째 이미지를 사용하거나 빈 문자열
-        name = this.itemName,
-        category = this.categoryName.joinToString(", "),
-        exchangeCondition = this.itemCondition
-    )
-}
-
-fun mapRegionToLocationId(regionName: String): Int? {
-    return when (regionName) {
-        "흑석동" -> 1
-        "이태원2동" -> 2
-        // TODO: 다른 지역에 대한 매핑 추가
-        else -> null
-    }
-}
-
-//import androidx.compose.ui.unit.toPx // toPx()를 사용하기 위해 필요
-
+import site.weshare.android.data.GroupPurchaseRepository
+import site.weshare.android.model.GroupPurchasePost
 
 @Composable
 fun HomeScreen(
@@ -161,7 +133,20 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
         SectionHeader(title = "공동구매 가치할래?", onMoreClick = onMoreGonggu)
         Spacer(modifier = Modifier.height(16.dp))
-        HorizontalProductList(products = MockData.groupPurchaseProducts) { product: GroupPurchaseProduct ->
+        val groupPurchaseRepository = remember { GroupPurchaseRepository() }
+        var groupPurchaseProducts by remember { mutableStateOf<List<GroupPurchasePost>>(emptyList()) }
+
+        LaunchedEffect(Unit) {
+            // TODO: Get accessToken and locationId from a reliable source
+            val accessToken = "your_access_token"
+            val locationId = 1
+            try {
+                groupPurchaseProducts = groupPurchaseRepository.getGroupPurchasePosts(accessToken, locationId, null)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+        HorizontalProductList(products = groupPurchaseProducts) { product: GroupPurchasePost ->
             GroupPurchaseProductItem(product = product)
         }
 
@@ -169,75 +154,17 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
         SectionHeader(title = "물품교환 가치할래?", onMoreClick = onMoreExchange)
         Spacer(modifier = Modifier.height(16.dp))
-        val context = LocalContext.current
-        val coroutineScope = rememberCoroutineScope()
+        val exchangeRepository = remember { ExchangeRepository() }
         var exchangeProducts by remember { mutableStateOf<List<ExchangeProduct>>(emptyList()) }
 
         LaunchedEffect(Unit) {
-            // 1) 우선 대표/보조 locationId 저장본을 사용
-            val primaryId = getRepresentativeLocationId(context)
-            val secondaryId = getSecondaryLocationId(context)
-            val chosenLocationId = (primaryId ?: secondaryId)?.toInt()
-
-            if (chosenLocationId != null) {
-                val accessToken = getAccessToken(context)
-                if (accessToken != null) {
-                    coroutineScope.launch {
-                        try {
-                            val response = ApiClient.exchangeApi.getExchangePosts(
-                                accessToken = accessToken,
-                                locationId = chosenLocationId,
-                                lastPostId = null
-                            )
-                            if (response.isSuccessful) {
-                                response.body()?.exchangePostDtoList?.let { dtoList ->
-                                    exchangeProducts = dtoList.map { it.toExchangeProduct() }
-                                }
-                            } else {
-                                println("물품 교환 목록 가져오기 실패: ${response.code()} - ${response.errorBody()?.string()}")
-                            }
-                        } catch (e: Exception) {
-                            println("물품 교환 목록 가져오기 중 예외 발생: ${e.message}")
-                        }
-                    }
-                } else {
-                    println("Access Token이 없습니다. 로그인 필요.")
-                }
-            } else {
-                // 2) (구) 지역 문자열 기반 저장값이 있으면 구동 (임시 호환)
-                val selectedRegions = getSelectedRegions(context)
-                if (selectedRegions.isNotEmpty()) {
-                    val firstRegion = selectedRegions.first()
-                    val fallbackLocationId = mapRegionToLocationId(firstRegion)
-
-                    if (fallbackLocationId != null) {
-                        val accessToken = getAccessToken(context)
-                        if (accessToken != null) {
-                            coroutineScope.launch {
-                                try {
-                                    val response = ApiClient.exchangeApi.getExchangePosts(
-                                        accessToken = accessToken,
-                                        locationId = fallbackLocationId,
-                                        lastPostId = null
-                                    )
-                                    if (response.isSuccessful) {
-                                        response.body()?.exchangePostDtoList?.let { dtoList ->
-                                            exchangeProducts = dtoList.map { it.toExchangeProduct() }
-                                        }
-                                    } else {
-                                        println("물품 교환 목록 가져오기 실패: ${response.code()} - ${response.errorBody()?.string()}")
-                                    }
-                                } catch (e: Exception) {
-                                    println("물품 교환 목록 가져오기 중 예외 발생: ${e.message}")
-                                }
-                            }
-                        } else {
-                            println("Access Token이 없습니다. 로그인 필요.")
-                        }
-                    } else {
-                        println("선택된 지역에 대한 locationId를 찾을 수 없습니다.")
-                    }
-                }
+            // TODO: Get accessToken and locationId from a reliable source
+            val accessToken = "your_access_token"
+            val locationId = 1
+            try {
+                exchangeProducts = exchangeRepository.getExchangePosts(accessToken, locationId, null)
+            } catch (e: Exception) {
+                // Handle error
             }
         }
         HorizontalProductList(products = exchangeProducts) { product: ExchangeProduct ->
