@@ -92,7 +92,10 @@ fun mapRegionToLocationId(regionName: String): Int? {
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onMoreGonggu: () -> Unit = {},
+    onMoreExchange: () -> Unit = {}
+) {
     val adImages = listOf(
         R.drawable.adv_1 // 광고 이미지 리소스 ID
     )
@@ -155,12 +158,7 @@ fun HomeScreen() {
 
         // 공동구매 섹션
         Spacer(modifier = Modifier.height(24.dp))
-        SectionHeader(title = "공동구매 가치할래?") {
-            // TODO: 추후에 화면 이동 코드를 추가해야 합니다.
-            // 공동구매 화면으로 이동하는 로직 (NavHostController 사용)
-            // navController.navigate("groupPurchaseScreen")
-            println("공동구매 더보기 클릭") // 임시 확인용
-        }
+        SectionHeader(title = "공동구매 가치할래?", onMoreClick = onMoreGonggu)
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalProductList(products = MockData.groupPurchaseProducts) { product: GroupPurchaseProduct ->
             GroupPurchaseProductItem(product = product)
@@ -168,12 +166,7 @@ fun HomeScreen() {
 
         // 물품교환 섹션
         Spacer(modifier = Modifier.height(24.dp))
-        SectionHeader(title = "물품교환 가치할래?") {
-            // TODO: 추후에 화면 이동 코드를 추가해야 합니다.
-            // 물품교환 화면으로 이동하는 로직 (NavHostController 사용)
-            // navController.navigate("exchangeScreen")
-            println("물품교환 더보기 클릭") // 임시 확인용
-        }
+        SectionHeader(title = "물품교환 가치할래?", onMoreClick = onMoreExchange)
         Spacer(modifier = Modifier.height(16.dp))
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
