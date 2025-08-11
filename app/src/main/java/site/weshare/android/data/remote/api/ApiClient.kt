@@ -1,3 +1,5 @@
+package site.weshare.android.data.remote.api
+
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor

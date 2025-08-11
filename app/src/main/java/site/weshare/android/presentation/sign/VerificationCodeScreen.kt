@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.launch
 import site.weshare.android.data.remote.api.model.EmailVerifyRequest
+import site.weshare.android.data.remote.api.ApiClient
 
 @Composable
 fun VerificationCodeScreen(

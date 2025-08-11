@@ -38,6 +38,7 @@ import java.util.*
 import jxl.Workbook
 import site.weshare.android.util.saveRepresentativeLocationId
 import site.weshare.android.util.saveSecondaryLocationId
+import site.weshare.android.data.remote.api.ApiClient
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 

@@ -68,6 +68,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import site.weshare.android.util.getRepresentativeLocationId
 import site.weshare.android.util.getSecondaryLocationId
+import site.weshare.android.data.remote.api.ApiClient
 
 fun ExchangePostDto.toExchangeProduct(): ExchangeProduct {
     return ExchangeProduct(
