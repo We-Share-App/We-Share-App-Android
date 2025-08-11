@@ -61,7 +61,11 @@ import site.weshare.android.util.getRepresentativeLocationId
 import site.weshare.android.util.getSecondaryLocationId
 import site.weshare.android.data.remote.api.ApiClient
 
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import site.weshare.android.R
 import site.weshare.android.data.GroupPurchaseRepository
+import site.weshare.android.model.ExchangePost
 import site.weshare.android.model.GroupPurchasePost
 
 @Composable
@@ -72,6 +76,36 @@ fun HomeScreen(
     val adImages = listOf(
         R.drawable.adv_1 // 광고 이미지 리소스 ID
     )
+
+    val exchangeRepository = remember { ExchangeRepository() }
+    val groupPurchaseRepository = remember { GroupPurchaseRepository() }
+
+    var exchangeProducts by remember { mutableStateOf<List<ExchangePost>>(emptyList()) }
+    var groupPurchaseProducts by remember { mutableStateOf<List<GroupPurchasePost>>(emptyList()) }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        // TODO: Get accessToken and locationId from a reliable source
+        val accessToken = "your_access_token"
+        val locationId = 1
+
+        coroutineScope.launch {
+            try {
+                exchangeProducts = exchangeRepository.getExchangePosts(accessToken, locationId, null)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+
+        coroutineScope.launch {
+            try {
+                groupPurchaseProducts = groupPurchaseRepository.getGroupPurchasePosts(accessToken, locationId, null)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -108,7 +142,7 @@ fun HomeScreen(
 
         LaunchedEffect(Unit) {
             while (true) {
-                delay(3000)
+                kotlinx.coroutines.delay(3000)
                 val nextPage = (adPagerState.currentPage + 1) % adPagerState.pageCount
                 adPagerState.animateScrollToPage(nextPage)
             }
@@ -133,19 +167,6 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
         SectionHeader(title = "공동구매 가치할래?", onMoreClick = onMoreGonggu)
         Spacer(modifier = Modifier.height(16.dp))
-        val groupPurchaseRepository = remember { GroupPurchaseRepository() }
-        var groupPurchaseProducts by remember { mutableStateOf<List<GroupPurchasePost>>(emptyList()) }
-
-        LaunchedEffect(Unit) {
-            // TODO: Get accessToken and locationId from a reliable source
-            val accessToken = "your_access_token"
-            val locationId = 1
-            try {
-                groupPurchaseProducts = groupPurchaseRepository.getGroupPurchasePosts(accessToken, locationId, null)
-            } catch (e: Exception) {
-                // Handle error
-            }
-        }
         HorizontalProductList(products = groupPurchaseProducts) { product: GroupPurchasePost ->
             GroupPurchaseProductItem(product = product)
         }
@@ -154,20 +175,7 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
         SectionHeader(title = "물품교환 가치할래?", onMoreClick = onMoreExchange)
         Spacer(modifier = Modifier.height(16.dp))
-        val exchangeRepository = remember { ExchangeRepository() }
-        var exchangeProducts by remember { mutableStateOf<List<ExchangeProduct>>(emptyList()) }
-
-        LaunchedEffect(Unit) {
-            // TODO: Get accessToken and locationId from a reliable source
-            val accessToken = "your_access_token"
-            val locationId = 1
-            try {
-                exchangeProducts = exchangeRepository.getExchangePosts(accessToken, locationId, null)
-            } catch (e: Exception) {
-                // Handle error
-            }
-        }
-        HorizontalProductList(products = exchangeProducts) { product: ExchangeProduct ->
+        HorizontalProductList(products = exchangeProducts) { product: ExchangePost ->
             ExchangeProductItem(product = product)
         }
     }
@@ -307,32 +315,7 @@ fun LazyRowSlideBarIndicator(
 
 
 @Composable
-fun GroupPurchaseProductItem(product: GroupPurchaseProduct) {
-    Column(
-        modifier = Modifier
-            .width(100.dp) // 아이템의 너비는 HorizontalPager의 contentPadding과 함께 조정
-    ) {
-        // 이미지는 리소스 ID를 사용하도록 변경
-        val imageResId = product.imageUrl.toIntOrNull() ?: R.drawable.ic_launcher_foreground // 기본 이미지
-        Image(
-            painter = painterResource(id = imageResId),
-            contentDescription = product.name,
-            modifier = Modifier
-                .size(95.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = product.name, fontSize = 16.sp, fontWeight = FontWeight.Medium, maxLines = 1)
-        Text(text = "총 구매 개수 : ${product.totalQuantity}개", fontSize = 12.sp, color = Color.Gray)
-        val remainingItems = product.totalQuantity - product.quantitySold
-        Text(text = "남은 개수: ${remainingItems}개", fontSize = 12.sp, color = Color.Gray)
-
-    }
-}
-
-@Composable
-fun ExchangeProductItem(product: ExchangeProduct) {
+fun GroupPurchaseProductItem(product: GroupPurchasePost) {
     Column(
         modifier = Modifier
             .width(100.dp) // 아이템의 너비는 HorizontalPager의 contentPadding과 함께 조정
@@ -340,16 +323,37 @@ fun ExchangeProductItem(product: ExchangeProduct) {
         // 이미지는 URL을 사용하도록 변경 (Coil)
         Image(
             painter = rememberAsyncImagePainter(product.imageUrl),
-            contentDescription = product.name,
+            contentDescription = product.title,
             modifier = Modifier
                 .size(95.dp)
                 .clip(RoundedCornerShape(8.dp)),
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = product.name, fontSize = 16.sp, fontWeight = FontWeight.Medium, maxLines = 1)
-        Text(text = product.category, fontSize = 12.sp, color = Color.Gray)
-        Text(text = product.exchangeCondition, fontSize = 12.sp, color = Color.Gray)
+        Text(text = product.title, fontSize = 16.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+        Text(text = "참여인원: ${product.participants}/${product.total}", fontSize = 12.sp, color = Color.Gray)
+    }
+}
+
+@Composable
+fun ExchangeProductItem(product: ExchangePost) {
+    Column(
+        modifier = Modifier
+            .width(100.dp) // 아이템의 너비는 HorizontalPager의 contentPadding과 함께 조정
+    ) {
+        // 이미지는 URL을 사용하도록 변경 (Coil)
+        Image(
+            painter = rememberAsyncImagePainter(product.imageUrl),
+            contentDescription = product.title,
+            modifier = Modifier
+                .size(95.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = product.title, fontSize = 16.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+        Text(text = product.location, fontSize = 12.sp, color = Color.Gray)
+        Text(text = "Likes: ${product.likes}, Comments: ${product.comments}", fontSize = 12.sp, color = Color.Gray)
     }
 }
 
@@ -369,13 +373,13 @@ fun SectionHeaderPreview() {
 @Composable
 fun GroupPurchaseProductItemPreview() {
     GroupPurchaseProductItem(
-        product = GroupPurchaseProduct(
-            id = "gp_001",
-            imageUrl = R.drawable.img_product_samdasoo.toString(),
-            name = "제주삼다수 2L",
-            quantitySold = 24,
-            totalQuantity = 32,
-            remainingDays = 8
+        product = GroupPurchasePost(
+            id = 1,
+            title = "제주삼다수 2L",
+            imageUrl = "",
+            location = "Location",
+            participants = 10,
+            total = 20
         )
     )
 }
@@ -384,12 +388,13 @@ fun GroupPurchaseProductItemPreview() {
 @Composable
 fun ExchangeProductItemPreview() {
     ExchangeProductItem(
-        product = ExchangeProduct(
-            id = "ex_001",
-            imageUrl = R.drawable.img_exchange_lotte_giants.toString(),
-            name = "롯데자이언츠",
-            category = "스포츠, 의류",
-            exchangeCondition = "희망 카테고리"
+        product = ExchangePost(
+            id = 1,
+            title = "롯데자이언츠",
+            imageUrl = "",
+            location = "Location",
+            likes = 10,
+            comments = 5
         )
     )
 }
